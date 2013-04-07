@@ -47,6 +47,14 @@ Matches 2 digits in a row.
 
 Matches a P:num segment.
 
+#### :category
+
+Matches `<your_reserved_category_word>/<category_id_or_url_title>`.
+
+#### :all
+
+Matches all possible segments.
+
 ### Matches
 
 If you encapsulate a wildcard in parentheses, that segment will be available as a variable to dynamically call a template:
