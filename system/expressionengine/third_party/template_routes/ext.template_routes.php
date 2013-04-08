@@ -97,8 +97,16 @@ class Template_routes_ext {
 		// normalize the uri_string
 		$uri_string = rtrim($uri_string, '/');
 
-		// if, indeed, we have good routes
-		if (is_array($routes))
+		// get all the Pages/Structure URIs
+		$site_pages = $this->EE->config->item('site_pages');
+
+		$site_id = $this->EE->config->item('site_id');
+
+		// check if this URI is a Pages URI
+		$is_page = isset($site_pages[$site_id]['uris']) ? array_search('/'.$uri_string, $site_pages[$site_id]['uris']) : FALSE;
+
+		// ensure that this is not a Pages URI and that we have good routes
+		if ($is_page === FALSE && is_array($routes))
 		{
 			// loop through all the defined routes and check if the uri_string is a match
 			foreach($routes as $rule => $template)
