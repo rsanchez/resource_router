@@ -67,7 +67,8 @@ class Template_routes_ext {
 			'hook'		=> 'core_template_route',
 			'settings'	=> serialize($this->settings),
 			'version'	=> $this->version,
-			'enabled'	=> 'y'
+			'enabled'	=> 'y',
+			'priority'  => 1,
 		);
 
 		$this->EE->db->insert('extensions', $data);			
@@ -87,22 +88,23 @@ class Template_routes_ext {
 		// get the routes array from the config file
 		$routes = $this->EE->config->item('template_routes');
 
-		// set the default route to any other extension calling this hook
-		$route = $this->EE->extensions->last_call;
-
 		// set all the {route_X} variables to blank by default
 		for ($i = 0; $i <= 10; $i++)
 		{
 			$this->EE->config->_global_vars['route_'.$i] = '';
 		}
 
+		// normalize the uri_string
+		$uri_string = rtrim($uri_string, '/');
+
+		// if, indeed, we have good routes
 		if (is_array($routes))
 		{
 			// loop through all the defined routes and check if the uri_string is a match
 			foreach($routes as $rule => $template)
 			{
 				// check if the uri_string matches this route
-				if (preg_match($this->rule_to_regex($rule), rtrim($uri_string, '/'), $matches))
+				if (preg_match($this->rule_to_regex($rule), $uri_string, $matches))
 				{
 					// loop through the matched sub-strings
 					foreach ($matches as $i => $match)
@@ -113,16 +115,18 @@ class Template_routes_ext {
 						// replace any sub-string matches in the template definition
 						$template = str_replace('$'.$i, $match, $template);
 					}
+
+					// prevent other extensions from messing with us
+					$this->EE->extensions->end_script = TRUE;
 					
 					// set the route as array from the template string
-					$route = explode('/', $template);
-
-					break;
+					return explode('/', $template);
 				}
 			}
 		}
 
-		return $route;
+		// set the default route to any other extension calling this hook
+		return $this->EE->extensions->last_call;
 	}
 
 	/**
