@@ -114,6 +114,16 @@ class Template_routes_ext {
 				// check if the uri_string matches this route
 				if (preg_match($this->rule_to_regex($rule), $uri_string, $matches))
 				{
+					// check if it has wildcards
+					if (FALSE !== ($wildcard = strpos($rule, ':')))
+					{
+						// the channel module uses this query_string property to do its dynamic stuff
+						// normally gets set in Template::parse_template_uri(), but we are overriding that function here
+						// let's grab the bits of the uri that are dynamic and set that as the query_string
+						// e.g. blog/nested/here/:any => _blog/_view will yield a query_string of that final segment
+						$this->EE->uri->query_string = preg_replace('#^'.preg_quote(substr($rule, 0, $wildcard)).'#', '', $uri_string);
+					}
+
 					// loop through the matched sub-strings
 					foreach ($matches as $i => $match)
 					{
