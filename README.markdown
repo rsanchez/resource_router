@@ -55,6 +55,14 @@ Matches `<your_reserved_category_word>/<category_id_or_url_title>`.
 
 Matches all possible segments.
 
+### Variables
+
+#### {page_uri:ENTRY_ID}
+
+	$config['template_routes'] = array(
+		'{page_uri:12}/:category/:pagination' => '_blog/category',
+	);
+
 ### Matches
 
 If you encapsulate a wildcard in parentheses, that segment will be available as a variable to dynamically call a template:

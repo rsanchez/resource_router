@@ -111,6 +111,18 @@ class Template_routes_ext {
 			// loop through all the defined routes and check if the uri_string is a match
 			foreach($routes as $rule => $template)
 			{
+				// replace all {page_uri:XX} variables in the rule definition
+				if (preg_match_all('/{page_uri:(\d+)}/', $rule, $matches))
+				{
+					foreach ($matches[1] as $i => $entry_id)
+					{
+						if (isset($site_pages[$site_id]['uris'][$entry_id]))
+						{
+							$rule = str_replace($matches[0][$i], ltrim($site_pages[$site_id]['uris'][$entry_id], '/'), $rule);
+						}
+					}
+				}
+
 				// check if the uri_string matches this route
 				if (preg_match($this->rule_to_regex($rule), $uri_string, $matches))
 				{
