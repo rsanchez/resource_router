@@ -105,12 +105,21 @@ class Template_routes_ext {
 		// check if this URI is a Pages URI
 		$is_page = isset($site_pages[$site_id]['uris']) ? array_search('/'.$uri_string, $site_pages[$site_id]['uris']) : FALSE;
 
+		// set the {route_1} to the pages URI, which should be a common usage
+		if ($is_page)
+		{
+			$this->EE->config->_global_vars['route_1'] = $uri_string;
+		}
+
 		// ensure that this is not a Pages URI and that we have good routes
 		if ($is_page === FALSE && is_array($routes))
 		{
 			// loop through all the defined routes and check if the uri_string is a match
 			foreach($routes as $rule => $template)
 			{
+				// normalize the rule
+				$rule = rtrim($rule, '/');
+
 				// replace all {page_uri:XX} variables in the rule definition
 				if (preg_match_all('/{page_uri:(\d+)}/', $rule, $matches))
 				{
