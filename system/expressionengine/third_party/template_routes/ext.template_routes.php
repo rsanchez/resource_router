@@ -145,6 +145,19 @@ class Template_routes_ext {
 						$this->EE->uri->query_string = preg_replace('#^'.preg_quote(substr($rule, 0, $wildcard)).'#', '', $uri_string);
 					}
 
+					// I want Structure's global variables set on urls that start with a pages URI
+					// so we tell structure that the uri_string is the first match in the regex
+					if (isset($matches[1]) && isset($this->EE->extensions->OBJ['Structure_ext']) && isset($site_pages[$site_id]['uris']) && in_array('/'.$matches[1], $site_pages[$site_id]['uris']))
+					{
+						$uri_string = $this->EE->uri->uri_string;
+
+						$this->EE->uri->uri_string = $matches[1];
+
+						$this->EE->extensions->OBJ['Structure_ext']->sessions_start($this->EE->session);
+
+						$this->EE->uri->uri_string = $uri_string;
+					}
+
 					// loop through the matched sub-strings
 					foreach ($matches as $i => $match)
 					{
