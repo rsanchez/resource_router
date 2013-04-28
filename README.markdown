@@ -51,17 +51,13 @@ Matches a P:num segment.
 
 Matches `<your_reserved_category_word>/<category_id_or_url_title>`.
 
+#### :page:XX
+
+Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_id
+
 #### :all
 
 Matches all possible segments.
-
-### Variables
-
-#### {page_uri:ENTRY_ID}
-
-	$config['template_routes'] = array(
-		'{page_uri:12}/:category/:pagination' => '_blog/category',
-	);
 
 ### Matches
 
@@ -83,3 +79,16 @@ Like standard CodeIgniter routing, you may also use regular expressions in your 
 	$config['template_routes'] = array(
 		'blog/([A-Z])/:any' => 'blog/alphabetized',
 	);
+
+#### Examples
+
+Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure page:
+
+	$config['template_routes'] = array(
+		':page:123/:pagination' => 'site/_blog-index',
+		':page:123/:category' => 'site/_blog-category',
+		':page:123/:year' => 'site/_blog-yearly',
+		':page:123/:year/:month' => 'site/_blog-monthly',
+		':page:123/:year/:month/:day' => 'site/_blog-daily',
+	);
+

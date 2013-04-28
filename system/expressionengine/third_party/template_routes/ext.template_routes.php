@@ -103,7 +103,7 @@ class Template_routes_ext {
 		$site_id = $this->EE->config->item('site_id');
 
 		// check if this URI is a Pages URI
-		$is_page = isset($site_pages[$site_id]['uris']) ? array_search('/'.$uri_string, $site_pages[$site_id]['uris']) : FALSE;
+		$is_page = isset($site_pages[$site_id]['uris']) ? in_array('/'.$uri_string, $site_pages[$site_id]['uris']) : FALSE;
 
 		// set the {route_1} to the pages URI, which should be a common usage
 		if ($is_page)
@@ -120,23 +120,76 @@ class Template_routes_ext {
 				// normalize the rule
 				$rule = rtrim($rule, '/');
 
-				// replace all {page_uri:XX} variables in the rule definition
-				if (preg_match_all('/{page_uri:(\d+)}/', $rule, $matches))
+				// does the rule have any wildcards?
+				$wildcard = strpos($rule, ':');
+
+				// build the regex from the rule wildcard(s)
+				if ($wildcard !== FALSE)
 				{
-					foreach ($matches[1] as $i => $entry_id)
+					// check for a :page:XX wildcard
+					if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($site_pages[$site_id]['uris'][$match[1]]))
 					{
-						if (isset($site_pages[$site_id]['uris'][$entry_id]))
-						{
-							$rule = str_replace($matches[0][$i], ltrim($site_pages[$site_id]['uris'][$entry_id], '/'), $rule);
-						}
+						$rule = str_replace($match[0], '('.ltrim($site_pages[$site_id]['uris'][$match[1]], '/').')', $rule);
 					}
+
+					$regex = str_replace(
+						array(
+							'(:any)',
+							':any',
+							'(:num)',
+							':num',
+							'(:year)',
+							':year',
+							'(:month)',
+							':month',
+							'(:day)',
+							':day',
+							'(:category)',
+							':category',
+							'/(:pagination)',
+							'/:pagination',
+							'(:pagination)',
+							':pagination',
+							'/(:all)',
+							'/:all',
+							':all',
+						),
+						array(
+							'([^/]+)',
+							'([^/]+)',
+							'(\d+)',
+							'(\d+)',
+							'(\d{4})',
+							'(\d{4})',
+							'(\d{2})',
+							'(\d{2})',
+							'(\d{2})',
+							'(\d{2})',
+							preg_quote($this->EE->config->item('reserved_category_word')).'/'.($this->EE->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
+							preg_quote($this->EE->config->item('reserved_category_word')).'/'.($this->EE->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
+							'(/P\d+)?',
+							'(/P\d+)?',
+							'(/P\d+)?',
+							'(/P\d+)?',
+							'/?(.*?)',
+							'.*?',
+							'.*?',
+						),
+						$rule
+					);
+				}
+				else
+				{
+					$regex = $rule;
 				}
 
+				$regex = '#^'.trim($regex, '/').'$#';
+
 				// check if the uri_string matches this route
-				if (preg_match($this->rule_to_regex($rule), $uri_string, $matches))
+				if (preg_match($regex, $uri_string, $matches))
 				{
 					// check if it has wildcards
-					if (FALSE !== ($wildcard = strpos($rule, ':')))
+					if ($wildcard !== FALSE)
 					{
 						// the channel module uses this query_string property to do its dynamic stuff
 						// normally gets set in Template::parse_template_uri(), but we are overriding that function here
@@ -149,13 +202,13 @@ class Template_routes_ext {
 					// so we tell structure that the uri_string is the first match in the regex
 					if (isset($matches[1]) && isset($this->EE->extensions->OBJ['Structure_ext']) && isset($site_pages[$site_id]['uris']) && in_array('/'.$matches[1], $site_pages[$site_id]['uris']))
 					{
-						$uri_string = $this->EE->uri->uri_string;
+						$temp_uri_string = $this->EE->uri->uri_string;
 
 						$this->EE->uri->uri_string = $matches[1];
 
 						$this->EE->extensions->OBJ['Structure_ext']->sessions_start($this->EE->session);
 
-						$this->EE->uri->uri_string = $uri_string;
+						$this->EE->uri->uri_string = $temp_uri_string;
 					}
 
 					// loop through the matched sub-strings
@@ -179,54 +232,6 @@ class Template_routes_ext {
 
 		// set the default route to any other extension calling this hook
 		return $this->EE->extensions->last_call;
-	}
-
-	/**
-	 * convert a CI-style route definition into regex
-	 * 
-	 * Wildcards: :any, :num, :year, :month, :day, :pagination
-	 * 
-	 * @param string $rule a URI rule, eg. "products/base/:any"
-	 */
-	protected function rule_to_regex($rule)
-	{
-		$rule = str_replace(
-			array(
-				':any',
-				':num',
-				':year',
-				':month',
-				':day',
-				'(:category)',
-				':category',
-				'/(:pagination)',
-				'/:pagination',
-				'(:pagination)',
-				':pagination',
-				'/(:all)',
-				'/:all',
-				':all',
-			),
-			array(
-				'[^/]+',
-				'\d+',
-				'\d{4}',
-				'\d{2}',
-				'\d{2}',
-				preg_quote($this->EE->config->item('reserved_category_word')).'/'.($this->EE->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
-				preg_quote($this->EE->config->item('reserved_category_word')).'/'.($this->EE->config->item('use_category_name') === 'y' ? '[^/]+' : '\d+'),
-				'(/P\d+)?',
-				'(/P\d+)?',
-				'(/P\d+)?',
-				'(/P\d+)?',
-				'/?(.*?)',
-				'.*?',
-				'.*?',
-			),
-			$rule
-		);
-
-		return '#^'.trim($rule, '/').'$#';
 	}
 
 	// ----------------------------------------------------------------------
