@@ -117,10 +117,10 @@ class Template_routes_ext {
 		$site_pages = $this->EE->config->item('site_pages');
 
 		$site_id = $this->EE->config->item('site_id');
-/*
+
 		// check if this URI is a Pages URI
 		$is_page = isset($site_pages[$site_id]['uris']) ? in_array('/'.$uri_string, $site_pages[$site_id]['uris']) : FALSE;
-
+/*
 		// set the {route_1} to the pages URI, which should be a common usage
 		if ($is_page)
 		{
@@ -279,7 +279,7 @@ class Template_routes_ext {
 
 			// I want Structure's global variables set on urls that start with a pages URI
 			// so we tell structure that the uri_string is the first match in the regex
-			if (isset($route['matches'][1]) && isset($this->EE->extensions->OBJ['Structure_ext']) && isset($site_pages[$site_id]['uris']) && in_array('/'.$route['matches'][1], $site_pages[$site_id]['uris']))
+			if ( ! $is_page && isset($route['matches'][1]) && isset($this->EE->extensions->OBJ['Structure_ext']) && isset($site_pages[$site_id]['uris']) && in_array('/'.$route['matches'][1], $site_pages[$site_id]['uris']))
 			{
 				$temp_uri_string = $this->EE->uri->uri_string;
 
