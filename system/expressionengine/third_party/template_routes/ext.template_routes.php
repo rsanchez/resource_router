@@ -300,11 +300,15 @@ class Template_routes_ext {
 				$route['template'] = str_replace('$'.$i, $match, $route['template']);
 			}
 
-			// prevent other extensions from messing with us
-			$this->EE->extensions->end_script = TRUE;
-			
-			// set the route as array from the template string
-			return explode('/', $route['template']);
+			// don't override the template, since it's a page URI
+			if ( ! $is_page)
+			{
+				// prevent other extensions from messing with us
+				$this->EE->extensions->end_script = TRUE;
+				
+				// set the route as array from the template string
+				return explode('/', $route['template']);
+			}
 		}
 
 		// set the default route to any other extension calling this hook
