@@ -182,6 +182,9 @@ class Template_routes_ext {
 						if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($site_pages[$site_id]['uris'][$match[1]]))
 						{
 							$rule = str_replace($match[0], '('.ltrim($site_pages[$site_id]['uris'][$match[1]], '/').')', $rule);
+
+							// don't count a page uri as wildcard
+							$wildcard = strpos($rule, ':');
 						}
 
 						$regex = str_replace(
@@ -252,7 +255,7 @@ class Template_routes_ext {
 							// normally gets set in Template::parse_template_uri(), but we are overriding that function here
 							// let's grab the bits of the uri that are dynamic and set that as the query_string
 							// e.g. blog/nested/here/:any => _blog/_view will yield a query_string of that final segment
-							$route['query_string'] = preg_replace('#^'.preg_quote(substr($rule, 0, $wildcard)).'#', '', $uri_string);
+							$route['query_string'] = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
 						}
 
 						write_file($cache_file, json_encode($route));
