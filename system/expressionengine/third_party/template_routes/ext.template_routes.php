@@ -104,6 +104,8 @@ class Template_routes_ext {
 		// get the routes array from the config file
 		$routes = $this->EE->config->item('template_routes');
 
+		$caching_enabled = $this->EE->config->item('template_routes_caching_enabled');
+
 		// set all the {route_X} variables to blank by default
 		for ($i = 0; $i <= 10; $i++)
 		{
@@ -133,30 +135,33 @@ class Template_routes_ext {
 		// ensure that this is not a Pages URI and that we have good routes
 		if (is_array($routes))//if ($is_page === FALSE && is_array($routes))
 		{
-			// get our route cache, so we don't have to go through a bunch of regexes
-			$this->EE->load->helper('file');
-
-			$config_hash = md5(json_encode($routes));
-
-			$cache_file = $this->cache_path.md5($uri_string);
-
-			if (file_exists($this->cache_path.'cached_routes'))
+			if ($caching_enabled)
 			{
-				$cached_routes = file_get_contents($this->cache_path.'cached_routes');
+				// get our route cache, so we don't have to go through a bunch of regexes
+				$this->EE->load->helper('file');
 
-				//routes have changed, clear the cache
-				if ($cached_routes !== $config_hash)
+				$config_hash = md5(json_encode($routes));
+
+				$cache_file = $this->cache_path.md5($uri_string);
+
+				if (file_exists($this->cache_path.'cached_routes'))
 				{
-					delete_files($this->cache_path, TRUE);
+					$cached_routes = file_get_contents($this->cache_path.'cached_routes');
 
-					write_file($this->cache_path.'cached_routes', md5(json_encode($routes)));
-				}
-
-				if (file_exists($cache_file))
-				{
-					if ($cache = @file_get_contents($cache_file))
+					//routes have changed, clear the cache
+					if ($cached_routes !== $config_hash)
 					{
-						$route = @json_decode($cache, TRUE);
+						delete_files($this->cache_path, TRUE);
+
+						write_file($this->cache_path.'cached_routes', md5(json_encode($routes)));
+					}
+
+					if (file_exists($cache_file))
+					{
+						if ($cache = @file_get_contents($cache_file))
+						{
+							$route = @json_decode($cache, TRUE);
+						}
 					}
 				}
 			}
@@ -207,7 +212,6 @@ class Template_routes_ext {
 								':pagination',
 								'/(:all)',
 								'/:all',
-								':all',
 							),
 							array(
 								'([^/]+)',
@@ -226,9 +230,8 @@ class Template_routes_ext {
 								'(/P\d+)?',
 								'(/P\d+)?',
 								'(/P\d+)?',
-								'/?(.*?)',
-								'.*?',
-								'.*?',
+								'(/.*)?',
+								'(/.*)?',
 							),
 							$rule
 						);
@@ -246,7 +249,8 @@ class Template_routes_ext {
 						$found_match = TRUE;
 
 						$route['template'] = $template;
-						$route['matches'] = $matches;
+						//remove trailing/leading slashes from matches
+						$route['matches'] = array_map(array($this, 'trim_slashes'), $matches);
 
 						// check if it has wildcards
 						if ($wildcard !== FALSE)
@@ -258,7 +262,10 @@ class Template_routes_ext {
 							$route['query_string'] = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
 						}
 
-						write_file($cache_file, json_encode($route));
+						if ($caching_enabled)
+						{
+							write_file($cache_file, json_encode($route));
+						}
 
 						break;
 					}
@@ -268,7 +275,10 @@ class Template_routes_ext {
 				{
 					$route = array('template' => '');
 
-					write_file($cache_file, json_encode($route));
+					if ($caching_enabled)
+					{
+						write_file($cache_file, json_encode($route));
+					}
 				}
 			}
 		}
@@ -316,6 +326,11 @@ class Template_routes_ext {
 
 		// set the default route to any other extension calling this hook
 		return $this->EE->extensions->last_call;
+	}
+
+	public function trim_slashes($string)
+	{
+		return trim($string, '/');
 	}
 
 	// ----------------------------------------------------------------------
