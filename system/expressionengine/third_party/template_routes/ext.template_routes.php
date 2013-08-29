@@ -31,7 +31,7 @@ class Template_routes_ext {
 	public $docs_url		= '';
 	public $name			= 'Template Routes';
 	public $settings_exist	= 'n';
-	public $version			= '1.0.0';
+	public $version			= '1.0.1';
 	
 	private $EE;
 	
