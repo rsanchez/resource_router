@@ -101,6 +101,8 @@ class Template_routes_ext {
 	 */
 	public function core_template_route($uri_string)
 	{
+		$this->EE->load->helper('string');
+
 		// get the routes array from the config file
 		$routes = $this->EE->config->item('template_routes');
 
@@ -249,8 +251,9 @@ class Template_routes_ext {
 						$found_match = TRUE;
 
 						$route['template'] = $template;
+
 						//remove trailing/leading slashes from matches
-						$route['matches'] = array_map(array($this, 'trim_slashes'), $matches);
+						$route['matches'] = array_map('trim_slashes', $matches);
 
 						// check if it has wildcards
 						if ($wildcard !== FALSE)
@@ -326,11 +329,6 @@ class Template_routes_ext {
 
 		// set the default route to any other extension calling this hook
 		return $this->EE->extensions->last_call;
-	}
-
-	public function trim_slashes($string)
-	{
-		return trim($string, '/');
 	}
 
 	// ----------------------------------------------------------------------
