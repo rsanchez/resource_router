@@ -4,6 +4,8 @@ Control your URLs by remapping URI routes to a specific template, using [CodeIgn
 
 ## Installation
 
+*NOTE:* ExpressionEngine 2.6+ is required
+
 * Copy the /system/expressionengine/third_party/template_routes/ folder to your /system/expressionengine/third_party/ folder
 * Install the extension
 

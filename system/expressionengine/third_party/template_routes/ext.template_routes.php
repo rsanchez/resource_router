@@ -42,10 +42,9 @@ class Template_routes_ext {
 	 */
 	public function __construct($settings = '')
 	{
-		$this->EE =& get_instance();
 		$this->settings = $settings;
 
-		if ( ! $this->cache_path = $this->EE->config->slash_item('cache_path'))
+		if ( ! $this->cache_path = ee()->config->slash_item('cache_path'))
 		{
 			$this->cache_path = APPPATH.'cache/';
 		}
@@ -78,7 +77,7 @@ class Template_routes_ext {
 			'priority'  => 1,
 		);
 
-		$this->EE->db->insert('extensions', $data);			
+		ee()->db->insert('extensions', $data);			
 		
 	}
 
@@ -92,25 +91,25 @@ class Template_routes_ext {
 	 */
 	public function core_template_route($uri_string)
 	{
-		$this->EE->load->add_package_path(PATH_THIRD.'template_routes/');
+		ee()->load->add_package_path(PATH_THIRD.'template_routes/');
 
-		$this->EE->load->library('template_router');
+		ee()->load->library('template_router');
 
-		$this->EE->load->remove_package_path(PATH_THIRD.'template_routes/');
+		ee()->load->remove_package_path(PATH_THIRD.'template_routes/');
 
-		$this->EE->template_router->run($uri_string);
+		ee()->template_router->run($uri_string);
 
-		if ($this->EE->template_router->template && ! $this->EE->template_router->is_page)
+		if (ee()->template_router->template && ! ee()->template_router->is_page)
 		{
 			// prevent other extensions from messing with us
-			$this->EE->extensions->end_script = TRUE;
+			ee()->extensions->end_script = TRUE;
 			
 			// set the route as array from the template string
-			return explode('/', $this->EE->template_router->template);
+			return explode('/', ee()->template_router->template);
 		}
 
 		// set the default route to any other extension calling this hook
-		return $this->EE->extensions->last_call;
+		return ee()->extensions->last_call;
 	}
 
 	// ----------------------------------------------------------------------
@@ -124,8 +123,8 @@ class Template_routes_ext {
 	 */
 	function disable_extension()
 	{
-		$this->EE->db->where('class', __CLASS__);
-		$this->EE->db->delete('extensions');
+		ee()->db->where('class', __CLASS__);
+		ee()->db->delete('extensions');
 	}
 
 	// ----------------------------------------------------------------------

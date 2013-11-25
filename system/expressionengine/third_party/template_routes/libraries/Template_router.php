@@ -13,10 +13,8 @@ class Template_router {
 
 	public function __construct()
 	{
-		$this->EE =& get_instance();
-
 		// get the routes array from the config file
-		$routes = $this->EE->config->item('template_routes');
+		$routes = ee()->config->item('template_routes');
 
 		if (is_array($routes))
 		{
@@ -24,16 +22,16 @@ class Template_router {
 		}
 
 		// get all the Pages/Structure URIs
-		$site_pages = $this->EE->config->item('site_pages');
+		$site_pages = ee()->config->item('site_pages');
 
-		$site_id = $this->EE->config->item('site_id');
+		$site_id = ee()->config->item('site_id');
 
 		if (isset($site_pages[$site_id]['uris']))
 		{
 			$this->page_uris = $site_pages[$site_id]['uris'];
 		}
 
-		$this->EE->load->helper(array('file', 'string'));
+		ee()->load->helper(array('file', 'string'));
 	}
 
 	public function run($uri_string)
@@ -105,8 +103,8 @@ class Template_router {
 						'(\d{2})',
 						'(\d{2})',
 						'(\d{2})',
-						preg_quote($this->EE->config->item('reserved_category_word')).'/'.($this->EE->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
-						preg_quote($this->EE->config->item('reserved_category_word')).'/'.($this->EE->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
+						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
+						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
 						'(/P\d+)?',
 						'(/P\d+)?',
 						'(/P\d+)?',
@@ -161,20 +159,20 @@ class Template_router {
 		{
 			if ($this->query_string)
 			{
-				$this->EE->uri->query_string = $this->query_string;
+				ee()->uri->query_string = $this->query_string;
 			}
 
 			// I want Structure's global variables set on urls that start with a pages URI
 			// so we tell structure that the uri_string is the first match in the regex
-			if ( ! $this->is_page && isset($this->matches[1]) && isset($this->EE->extensions->OBJ['Structure_ext']) && in_array('/'.$this->matches[1], $this->page_uris))
+			if ( ! $this->is_page && isset($this->matches[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->matches[1], $this->page_uris))
 			{
-				$temp_uri_string = $this->EE->uri->uri_string;
+				$temp_uri_string = ee()->uri->uri_string;
 
-				$this->EE->uri->uri_string = $this->matches[1];
+				ee()->uri->uri_string = $this->matches[1];
 
-				$this->EE->extensions->OBJ['Structure_ext']->sessions_start($this->EE->session);
+				ee()->extensions->OBJ['Structure_ext']->sessions_start(ee()->session);
 
-				$this->EE->uri->uri_string = $temp_uri_string;
+				ee()->uri->uri_string = $temp_uri_string;
 			}
 
 			// loop through the matched sub-strings
@@ -216,11 +214,11 @@ class Template_router {
 	public function set_404()
 	{
 		//all the conditions to trigger a 404 in the TMPL class
-		$hidden_indicator = $this->EE->config->item('hidden_template_indicator') === FALSE ? '.' : ee()->config->item('hidden_template_indicator');
+		$hidden_indicator = ee()->config->item('hidden_template_indicator') === FALSE ? '.' : ee()->config->item('hidden_template_indicator');
 		
-		$this->EE->uri->page_query_string = '';
+		ee()->uri->page_query_string = '';
 		
-		$this->EE->config->set_item('hidden_template_404', 'y');
+		ee()->config->set_item('hidden_template_404', 'y');
 
 		$this->template = '/'.$hidden_indicator;
 	}
