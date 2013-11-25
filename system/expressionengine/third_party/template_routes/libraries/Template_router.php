@@ -39,7 +39,7 @@ class Template_router {
 		// set all the {route_X} variables to blank by default
 		for ($i = 0; $i <= 10; $i++)
 		{
-			$this->set_global('route_'.$i);
+			$this->setGlobal('route_'.$i);
 		}
 
 		// normalize the uri_string
@@ -179,7 +179,7 @@ class Template_router {
 			foreach ($this->matches as $i => $match)
 			{
 				// set each sub-string as a global template variable
-				$this->set_global('route_'.$i, $match);
+				$this->setGlobal('route_'.$i, $match);
 
 				// replace any sub-string matches in the template definition
 				$this->template = str_replace('$'.$i, $match, $this->template);
@@ -197,21 +197,21 @@ class Template_router {
 		return array_key_exists($which, $this->matches) ? $this->matches[$which] : FALSE;
 	}
 
-	public function set_global($key, $value = '')
+	public function setGlobal($key, $value = '')
 	{
-		$this->EE->config->_global_vars[$key] = $value;
+		ee()->config->_global_vars[$key] = $value;
 
 		return $this;
 	}
 
-	public function set_variable($name, $data)
+	public function setVariable($name, $data)
 	{
 		$this->variables[$name] = $data;
 
 		return $this;
 	}
 
-	public function set_404()
+	public function set404()
 	{
 		//all the conditions to trigger a 404 in the TMPL class
 		$hidden_indicator = ee()->config->item('hidden_template_indicator') === FALSE ? '.' : ee()->config->item('hidden_template_indicator');
