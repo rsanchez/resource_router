@@ -86,6 +86,46 @@ Like standard CodeIgniter routing, you may also use regular expressions in your 
 
 Don't forget to wrap in parentheses if you would like your regular expression to become a `{route_X}` variable.
 
+### Callbacks
+
+With PHP 5.3+, you can use callbacks in your routes:
+
+	$config['template_routes'] = array(
+		'blog/:any' => function($router, $route_1) {
+			return 'blog/single';
+		} 
+	);
+
+Your callback should return a valid `template_group/template` string.
+
+Or you can return `FALSE` to signify that this url does *not* match the route:
+
+	$config['template_routes'] = array(
+		'blog/:any' => function($router, $route_1) {
+			if ($route_1 === 'foo') {
+				return FALSE;
+			}
+			return 'blog/single';
+		} 
+	);
+
+The first argument in the callback is the router object. It has a few methods you can use.
+
+	$config['template_routes'] = array(
+		'blog/:any' => function($router, $route_1) {
+			// creates a {foo} global variable to use in your templates
+			$router->set_global('foo', 'bar');
+
+			// creates a set of variables to use in your templates
+			// @TODO replace with stash
+			$router->set_variable('foo', array(
+				''
+			));
+
+			$router->set_404();
+		} 
+	);
+
 ### Examples
 
 Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure page:
@@ -98,3 +138,45 @@ Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure
 		':page:123/:year/:month/:day' => 'site/_blog-daily',
 	);
 
+Use callbacks to validate categories in URLs and set a global variable:
+
+	$config['template_routes'] = array(
+		'blog/:any' => function($router) {
+			$segment = $router->match(1);
+
+			$query = ee()->db->select('cat_id')
+											 ->where('cat_url_title', $segment)
+											 ->where_in('group_id', array(1, 2))
+											 ->get('categories');
+
+			$cat_id = $query->row('cat_id');
+
+			$query->free_result();
+
+			if ($cat_id) {
+				// so you can:
+				// {exp:channel:entries channel="blog" category="{route_1_cat_id}"}
+				$router->set_global('route_1_cat_id', $query->row('cat_id'));
+
+				return 'blog/category';
+			}
+
+			return 'blog/single';
+		}
+	);
+
+	$config['template_routes'] = array(
+		'blog/:any' => function($router) {
+			$cat_id = $router->get_category(1, array('group_id' => 1));
+
+			if ($cat_id) {
+				// so you can:
+				// {exp:channel:entries channel="blog" category="{route_1_cat_id}"}
+				$router->set_global('route_1_cat_id', $query->row('cat_id'));
+
+				return 'blog/category';
+			}
+
+			return 'blog/single';
+		}
+	);
