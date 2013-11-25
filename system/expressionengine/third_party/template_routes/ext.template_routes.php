@@ -67,15 +67,6 @@ class Template_routes_ext {
 	{
 		// Setup custom settings in this array.
 		$this->settings = array();
-
-		if ( ! @mkdir($this->cache_path))
-		{
-			show_error('Could not create cache path: '.$this->cache_path);
-		}
-
-		$this->EE->load->helper('file');
-
-		write_file($this->cache_path.'cached_routes', '');
 		
 		$data = array(
 			'class'		=> __CLASS__,
