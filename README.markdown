@@ -105,10 +105,10 @@ Or you can return `FALSE` to signify that this url does *not* match the route:
 	$config['template_routes'] = array(
 		'blog/:any' => function($router, $route_1) {
 			if ($route_1 === 'foo') {
-				return FALSE;
+				return;
 			}
-			return 'blog/single';
-		} 
+			$router->setTemplate('blog/single');
+		}
 	);
 
 The first argument in the callback is the router object. It has a few methods you can use.
@@ -116,15 +116,16 @@ The first argument in the callback is the router object. It has a few methods yo
 	$config['template_routes'] = array(
 		'blog/:any' => function($router, $route_1) {
 			// creates a {foo} global variable to use in your templates
-			$router->set_global('foo', 'bar');
+			$router->setGlobal('foo', 'bar');
 
 			// creates a set of variables to use in your templates
-			// @TODO replace with stash
-			$router->set_variable('foo', array(
-				''
+			// {exp:template_routes:foo} {title} {slug} {/exp:template_routes:foo}
+			$router->setVariable('foo', array(
+				'title' => 'A title',
+				'slug' => 'a-title',
 			));
 
-			$router->set_404();
+			$router->set404();
 		} 
 	);
 
@@ -158,12 +159,12 @@ Use callbacks to validate categories in URLs and set a global variable:
 			if ($cat_id) {
 				// so you can:
 				// {exp:channel:entries channel="blog" category="{route_1_cat_id}"}
-				$router->set_global('route_1_cat_id', $query->row('cat_id'));
+				$router->setGlobal('route_1_cat_id', $query->row('cat_id'));
 
-				return 'blog/category';
+				$router->setTemplate('blog/category');
 			}
 
-			return 'blog/single';
+			$router->setTemplate('blog/single');
 		}
 	);
 
@@ -174,11 +175,11 @@ Use callbacks to validate categories in URLs and set a global variable:
 			if ($cat_id) {
 				// so you can:
 				// {exp:channel:entries channel="blog" category="{route_1_cat_id}"}
-				$router->set_global('route_1_cat_id', $query->row('cat_id'));
+				$router->setGlobal('route_1_cat_id', $query->row('cat_id'));
 
-				return 'blog/category';
+				$router->setTemplate('blog/category');
 			}
 
-			return 'blog/single';
+			$router->setTemplate('blog/single');
 		}
 	);

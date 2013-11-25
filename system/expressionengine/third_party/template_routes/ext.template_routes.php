@@ -99,13 +99,15 @@ class Template_routes_ext {
 
 		ee()->template_router->run($uri_string);
 
-		if (ee()->template_router->template && ! ee()->template_router->is_page)
+		$template = ee()->template_router->template();
+
+		if ($template && ! ee()->template_router->isPage())
 		{
 			// prevent other extensions from messing with us
 			ee()->extensions->end_script = TRUE;
 			
 			// set the route as array from the template string
-			return explode('/', ee()->template_router->template);
+			return explode('/', $template);
 		}
 
 		// set the default route to any other extension calling this hook

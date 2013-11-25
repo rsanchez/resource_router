@@ -13,12 +13,12 @@ class Template_routes
 
 	public function __call($name, $args)
 	{
-		if ( ! isset(ee()->template_router->variables[$name]))
+		$data = ee()->template_router->variable($name);
+
+		if ( ! $data)
 		{
 			return ee()->TMPL->no_results();
 		}
-
-		$data = ee()->template_router->variables[$name];
 
 		if (is_array($data))
 		{

@@ -5,11 +5,13 @@ class Template_router {
 	protected $routes = array();
 	protected $page_uris = array();
 
-	public $variables = array();
-	public $is_page = FALSE;
-	public $template = NULL;
-	public $query_string = '';
-	public $matches = array();
+	protected $http_status = 200;
+
+	protected $variables = array();
+	protected $is_page = FALSE;
+	protected $template = NULL;
+	protected $query_string = '';
+	protected $matches = array();
 
 	public function __construct()
 	{
@@ -34,6 +36,399 @@ class Template_router {
 		ee()->load->helper(array('file', 'string'));
 	}
 
+	/**
+	 * Does this route match a page URI?
+	 * 
+	 * @return boolean
+	 */
+	public function isPage()
+	{
+		return $this->is_page;
+	}
+
+	/**
+	 * Check if the given category is valid
+	 *
+	 * if ($router->isValidCategory(array(
+	 * 	 'cat_url_title' => $router->matches(1),
+	 * 	 'channel' => 'blog',
+	 * ))
+	 * {
+	 *   $router->setTemplate('blog/category');
+	 * }
+	 * 
+	 * @param  array   $where  where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid category
+	 */
+	public function isValidCategory($where)
+	{
+		$joined = FALSE;
+
+		if (isset($where['channel']) || isset($where['channel_id']))
+		{
+			if (isset($where['channel']))
+			{
+				$channel = is_array($where['channel']) ? $where['channel'] : array($where['channel']);
+
+				ee()->db->where_in('channel_name', $channel);
+			}
+
+			if (isset($where['channel_id']))
+			{
+				$channel_id = is_array($where['channel_id']) ? $where['channel_id'] : array($where['channel_id']);
+
+				ee()->db->where_in('channel_id', $channel_id);
+			}
+
+			ee()->db->select('cat_group');
+
+			$query = ee()->db->get('channels');
+
+			if ($query->num_rows() > 0 && ! isset($where['group_id']))
+			{
+				$where['group_id'] = array();
+			}
+
+			foreach ($query->result() as $row)
+			{
+				foreach (explode('|', $row->cat_group) as $group_id)
+				{
+					$where['group_id'][] = $group_id;
+				}
+			}
+
+			unset($where['channel'], $where['channel_id']);			
+		}
+
+		foreach ($where as $key => $value)
+		{
+			if ($joined === FALSE && strncmp($key, 'field_id_', 9) === 0)
+			{
+				ee()->db->join('category_field_data', 'category_field_data.cat_id = categories.cat_id');
+
+				$joined = TRUE;
+			}
+
+			if (is_array($value))
+			{
+				ee()->db->where_in($key, $value);
+			}
+			else
+			{
+				ee()->db->where($key, $value);
+			}
+		}
+
+		return ee()->db->count_all_results('channel_titles') > 0;
+	}
+
+	/**
+	 * Check if the given category ID is valid
+	 *
+	 * if ($router->isValidCategoryId($router->matches(1)))
+	 * {
+	 *   $router->setTemplate('blog/category');
+	 * }
+	 * 
+	 * @param  string|int  $cat_id a category id
+	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid category
+	 */
+	public function isValidCategoryId($cat_id, $where = array())
+	{
+		$where['cat_id'] = $cat_id;
+
+		return $this->isValidCategory($where);
+	}
+
+	/**
+	 * Check if the given category url title is valid
+	 *
+	 * if ($router->isValidCategoryUrlTitle($router->matches(1)))
+	 * {
+	 *   $router->setTemplate('blog/category');
+	 * }
+	 * 
+	 * @param  string  $cat_url_title a category url title
+	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid category
+	 */
+	public function isValidCategoryUrlTitle($cat_url_title, $where = array())
+	{
+		$where['cat_url_title'] = $cat_url_title;
+
+		return $this->isValidCategory($where);
+	}
+
+	/**
+	 * Check if the given entry is valid
+	 *
+	 * if ($router->isValidEntry(array(
+	 * 	 'url_title' => $router->matches(1),
+	 * 	 'channel' => 'blog',
+	 * 	 'status' => 'open',
+	 * ))
+	 * {
+	 *   $router->setTemplate('blog/detail');
+	 * }
+	 * 
+	 * @param  array   $where  where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid entry
+	 */
+	public function isValidEntry($where)
+	{
+		$joined_data = FALSE;
+		$joined_channel = FALSE;
+
+		foreach ($where as $key => $value)
+		{
+			if ($joined_data === FALSE && strncmp($key, 'field_id_', 9) === 0)
+			{
+				ee()->db->join('channel_data', 'channel_data.entry_id = channel_titles.entry_id');
+
+				$joined_data = TRUE;
+			}
+
+			if ($key === 'channel' || $key === 'channel_name')
+			{
+				if ($joined_channel === FALSE)
+				{
+					ee()->db->join('channels', 'channels.channel_id = channel_titles.channel_id');
+
+					$joined_channel = TRUE;
+				}
+
+				$key = 'channel_name';
+			}
+
+			if (is_array($value))
+			{
+				ee()->db->where_in($key, $value);
+			}
+			else
+			{
+				ee()->db->where($key, $value);
+			}
+		}
+
+		return ee()->db->count_all_results('channel_titles') > 0;
+	}
+
+	/**
+	 * Check if the given entry id is valid
+	 *
+	 * if ($router->isValidEntryId($router->matches(1)))
+	 * {
+	 *   $router->setTemplate('blog/detail');
+	 * }
+	 * 
+	 * @param  string  $entry_id
+	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid entry
+	 */
+	public function isValidEntryId($entry_id, $where = array())
+	{
+		$where['entry_id'] = $entry_id;
+
+		return $this->isValidEntry($where);
+	}
+
+	/**
+	 * Check if the given member is valid
+	 *
+	 * if ($router->isValidMember(array(
+	 * 	 'username' => $router->matches(1),
+	 * 	 'group_id' => 6,
+	 * ))
+	 * {
+	 *   $router->setTemplate('users/detail');
+	 * }
+	 * 
+	 * @param  array   $where  where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid member
+	 */
+	public function isValidMember($where)
+	{
+		foreach ($where as $key => $value)
+		{
+			if (is_array($value))
+			{
+				ee()->db->where_in($key, $value);
+			}
+			else
+			{
+				ee()->db->where($key, $value);
+			}
+		}
+
+		return ee()->db->count_all_results('members') > 0;
+	}
+
+	/**
+	 * Check if the given member_id is valid
+	 *
+	 * if ($router->isValidMemberId($router->matches(1)))
+	 * {
+	 *   $router->setTemplate('users/detail');
+	 * }
+	 * 
+	 * @param  int  $member_id
+	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid member
+	 */
+	public function isValidMemberId($member_id, $where = array())
+	{
+		$where['member_id'] = $member_id;
+
+		return $this->isValidMember($where);
+	}
+
+	/**
+	 * Check if the given url title is valid
+	 *
+	 * if ($router->isValidUrlTitle($router->matches(1)))
+	 * {
+	 *   $router->setTemplate('blog/detail');
+	 * }
+	 * 
+	 * @param  string  $url_title an entry url title
+	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid entry
+	 */
+	public function isValidUrlTitle($url_title, $where = array())
+	{
+		$where['url_title'] = $url_title;
+
+		return $this->isValidEntry($where);
+	}
+
+	/**
+	 * Check if the given username is valid
+	 *
+	 * if ($router->isValidUsername($router->matches(1)))
+	 * {
+	 *   $router->setTemplate('users/detail');
+	 * }
+	 * 
+	 * @param  string  $username
+	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @return boolean is this a valid member
+	 */
+	public function isValidUsername($username, $where = array())
+	{
+		$where['username'] = $username;
+
+		return $this->isValidMember($where);
+	}
+
+	/**
+	 * Send this data as a JSON response
+	 *
+	 * return $router->json(array('foo' => 'bar'));
+	 * 
+	 * @param  mixed $data
+	 * @return string
+	 */
+	public function json($data)
+	{
+		$this->setOutputType('json');
+
+		return json_encode($data);
+	}
+
+	/**
+	 * Get the matched wildcards
+	 * 
+	 * @return [type] [description]
+	 */
+	public function matches()
+	{
+		return $this->matches;
+	}
+
+	/**
+	 * Get the specified matched wildcard
+	 * 
+	 * @param  int $which the wildcard index
+	 * @return mixed|null null if doesn't exist
+	 */
+	public function match($which)
+	{
+		return array_key_exists($which, $this->matches) ? $this->matches[$which] : NULL;
+	}
+
+	/**
+	 * Output a string that will be output as the body content for this router endpoint
+	 *
+	 * $router->output('Hello world!');
+	 * 
+	 * @param string $output
+	 */
+	public function output($output)
+	{
+		ee()->output->final_output = $output;
+
+		$output_type = ee()->output->out_type;
+
+		ee()->output->set_status_header($this->http_status);
+
+		$override_types = array('webpage', 'css', 'js', 'xml', 'json');
+
+		// dont send those weird pragma no-cache headers
+		if (in_array($output_type, $override_types))
+		{
+			switch ($output_type)
+			{
+				case 'json':
+					$this->setContentType('application/json');
+					ee()->output->enable_profiler = FALSE;
+					break;
+				case 'webpage':
+					$this->setContentType('text/html; charset='.ee()->config->item('charset'));
+					break;
+				case 'css':
+					$this->setContentType('text/css');
+					break;
+				case 'js':
+					$this->setContentType('text/javascript');
+					ee()->output->enable_profiler = FALSE;
+					break;
+				case 'xml':
+					$this->setContentType('text/xml');
+					ee()->output->final_output = trim(ee()->output->final_output);
+					break;
+			}
+
+			ee()->output->out_type = 'cp_asset';
+		}
+
+		// Start from CodeIgniter.php
+		ee()->benchmark->mark('controller_execution_time_( EE / index )_end');
+
+		ee()->hooks->_call_hook('post_controller');
+
+		if (ee()->hooks->_call_hook('display_override') === FALSE)
+		{
+			ee()->output->_display();
+		}
+		
+		ee()->hooks->_call_hook('post_system');
+
+		if (class_exists('CI_DB') AND isset(ee()->db))
+		{
+			ee()->db->close();
+		}
+		// End from CodeIgniter.php
+
+		exit;
+	}
+
+	/**
+	 * Run the router against a uri_string
+	 * 
+	 * @param  string $uri_string
+	 * @return this
+	 */
 	public function run($uri_string)
 	{
 		// set all the {route_X} variables to blank by default
@@ -130,12 +525,12 @@ class Template_router {
 
 				if (is_callable($template))
 				{
-					$template = call_user_func($template, $this);
-				}
+					$output = call_user_func($template, $this);
 
-				if (is_null($this->template))
-				{
-					$this->template = $template;
+					if ($output)
+					{
+						return $this->output($output);
+					}
 				}
 
 				if ($this->template)
@@ -185,32 +580,15 @@ class Template_router {
 				$this->template = str_replace('$'.$i, $match, $this->template);
 			}
 		}
-	}
-
-	public function matches()
-	{
-		return $this->matches;
-	}
-
-	public function match($which)
-	{
-		return array_key_exists($which, $this->matches) ? $this->matches[$which] : FALSE;
-	}
-
-	public function setGlobal($key, $value = '')
-	{
-		ee()->config->_global_vars[$key] = $value;
 
 		return $this;
 	}
 
-	public function setVariable($name, $data)
-	{
-		$this->variables[$name] = $data;
-
-		return $this;
-	}
-
+	/**
+	 * Trigger a 404 using the built-in EE 404 template
+	 *
+	 * @return this
+	 */
 	public function set404()
 	{
 		//all the conditions to trigger a 404 in the TMPL class
@@ -221,5 +599,162 @@ class Template_router {
 		ee()->config->set_item('hidden_template_404', 'y');
 
 		$this->template = '/'.$hidden_indicator;
+	}
+
+	/**
+	 * Set the HTTP Content-Type header
+	 *
+	 * $router->setContentType('application/json');
+	 * 
+	 * @param string $content_type
+	 * @return this
+	 */
+	public function setContentType($content_type)
+	{
+		$this->setHeader('Content-Type', $content_type);
+
+		return $this;
+	}
+
+	/**
+	 * Set a global template variable
+	 *
+	 * $router->setGlobal
+	 * 
+	 * @param string $key   the variable name
+	 * @param string|bool|int $value
+	 * @return this
+	 */
+	public function setGlobal($key, $value = '')
+	{
+		ee()->config->_global_vars[$key] = $value;
+
+		return $this;
+	}
+
+	/**
+	 * Set an HTTP header
+	 *
+	 * $router->setHeader('Content-Type: application/json');
+	 * $router->setHeader('Content-Type', 'application/json');
+	 * 
+	 * @param string $header the full header string if using one parameter, the header name if using two parameters
+	 * @param string $content [optional] the header content if using two parameters
+	 * @return this
+	 */
+	public function setHeader($header, $content = NULL)
+	{
+		if (func_num_args() === 1)
+		{
+			ee()->output->set_header($header);
+		}
+		else
+		{
+			ee()->output->set_header(sprintf('%s: %s', $header, func_get_arg(1)));
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set an HTTP status code
+	 *
+	 * $router->setHttpStatus(401);
+	 * 
+	 * @param int $code a valid HTTP status code
+	 * @return this
+	 */
+	public function setHttpStatus($code)
+	{
+		$this->http_status = $code;
+
+		return $this;
+	}
+
+	/**
+	 * Set the EE output class type
+	 *
+	 * $router->setOutputType('css');
+	 * 
+	 * @param string $type one of the following: webpage, css, js, json, xml, feed, 404
+	 * @return this
+	 */
+	public function setOutputType($type)
+	{
+		ee()->output->out_type = $type;
+
+		return $this;
+	}
+
+	/**
+	 * Set the template to use for this router endpoint
+	 *
+	 * $router->setTemplate('foo/bar');
+	 * 
+	 * @param string $template a template_group/template_name pair
+	 * @return this
+	 */
+	public function setTemplate($template)
+	{
+		$this->template = $template;
+
+		return $this;
+	}
+
+	/**
+	 * Set a template single or pair variable for use with the {exp:template_routes} plugin
+	 *
+	 * $router->setVariable('foo', 'bar');
+	 *
+	 * {exp:template_routes:foo} -> bar
+	 *
+	 * $router->setVariable('foo', array('bar' => 1, 'baz' => 2));
+	 *
+	 * {exp:template_routes:foo}{bar}-{baz}{/exp:template_routes:foo} -> 1-2
+	 *
+	 * $router->setVariable('foo', array(array('bar' => 1, 'baz' => 2), array('bar' => 3, 'baz' => 4)));
+	 *
+	 * {exp:template_routes:foo}{bar}-{baz}|{/exp:template_routes:foo} -> 1-2|3-4
+	 * 
+	 * @param string $name the key or identifier of the variable
+	 * @param string|array $data an array for a tag pair or a single value
+	 * @return this
+	 */
+	public function setVariable($name, $data)
+	{
+		$this->variables[$name] = $data;
+
+		return $this;
+	}
+
+	/**
+	 * Get the set template
+	 * 
+	 * @return mixed
+	 */
+	public function template()
+	{
+		return $this->template;
+	}
+
+	/**
+	 * Get the specified set variable
+	 * 
+	 * @param  string $which the variable key
+	 * @return mixed|null null if doesn't exist
+	 */
+	public function variable($which)
+	{
+		return array_key_exists($which, $this->variables) ? $this->variables[$which] : NULL;
+	}
+
+	/**
+	 * Get all set variables
+	 * 
+	 * @return array
+	 */
+	public function variables()
+	{
+		return $this->variables;
 	}
 }
