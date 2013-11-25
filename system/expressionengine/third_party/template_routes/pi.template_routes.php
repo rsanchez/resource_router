@@ -13,10 +13,8 @@ class Template_routes
 		$this->EE->load->remove_package_path(PATH_THIRD.'template_routes/');
 	}
 
-	public function variable()
+	public function __call($name, $args)
 	{
-		$name = $this->EE->TMPL->fetch_param('name');
-
 		if ( ! isset($this->EE->template_router->variables[$name]))
 		{
 			return $this->EE->TMPL->no_results();
