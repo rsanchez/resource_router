@@ -189,6 +189,16 @@ class Template_router {
 		}
 	}
 
+	public function matches()
+	{
+		return $this->matches;
+	}
+
+	public function match($which)
+	{
+		return array_key_exists($which, $this->matches) ? $this->matches[$which] : FALSE;
+	}
+
 	public function set_global($key, $value = '')
 	{
 		$this->EE->config->_global_vars[$key] = $value;
@@ -203,7 +213,7 @@ class Template_router {
 		return $this;
 	}
 
-	public function show_404()
+	public function set_404()
 	{
 		//all the conditions to trigger a 404 in the TMPL class
 		$hidden_indicator = $this->EE->config->item('hidden_template_indicator') === FALSE ? '.' : ee()->config->item('hidden_template_indicator');
