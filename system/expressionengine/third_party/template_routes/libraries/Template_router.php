@@ -611,6 +611,11 @@ class Template_router {
 				//remove trailing/leading slashes from matches
 				$this->wildcards = array_map('trim_slashes', $this->wildcards);
 
+				if (is_string($template))
+				{
+					$this->setTemplate($template);
+				}
+
 				if (is_callable($template))
 				{
 					$output = call_user_func($template, $this);
