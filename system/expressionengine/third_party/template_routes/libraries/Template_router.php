@@ -2,16 +2,50 @@
 
 class Template_router {
 
+	/**
+	 * List of routes
+	 *
+	 * 'this/is/a/uri/:any' => 'template_group/template_name',
+	 * 
+	 * @var array
+	 */
 	protected $routes = array();
-	protected $page_uris = array();
 
-	protected $http_status = 200;
+	/**
+	 * List of site Page URIs
+	 * @var array
+	 */
+	protected $uris = array();
 
+	/**
+	 * HTTP Status code
+	 * @var integer
+	 */
+	protected $status = 200;
+
+	/**
+	 * Template variables
+	 * @var array
+	 */
 	protected $variables = array();
-	protected $is_page = FALSE;
+
+	/**
+	 * Is the matched URI a page URI?
+	 * @var boolean
+	 */
+	protected $page = FALSE;
+
+	/**
+	 * The template to load
+	 * @var null|string
+	 */
 	protected $template = NULL;
-	protected $query_string = '';
-	protected $matches = array();
+
+	/**
+	 * List of matched wildcards
+	 * @var array
+	 */
+	protected $wildcards = array();
 
 	public function __construct()
 	{
@@ -30,7 +64,7 @@ class Template_router {
 
 		if (isset($site_pages[$site_id]['uris']))
 		{
-			$this->page_uris = $site_pages[$site_id]['uris'];
+			$this->uris = $site_pages[$site_id]['uris'];
 		}
 
 		ee()->load->helper(array('file', 'string'));
@@ -43,14 +77,14 @@ class Template_router {
 	 */
 	public function isPage()
 	{
-		return $this->is_page;
+		return $this->page;
 	}
 
 	/**
 	 * Check if the given category is valid
 	 *
 	 * if ($router->isValidCategory(array(
-	 * 	 'cat_url_title' => $router->matches(1),
+	 * 	 'cat_url_title' => $router->wildcard(1),
 	 * 	 'channel' => 'blog',
 	 * ))
 	 * {
@@ -125,7 +159,7 @@ class Template_router {
 	/**
 	 * Check if the given category ID is valid
 	 *
-	 * if ($router->isValidCategoryId($router->matches(1)))
+	 * if ($router->isValidCategoryId($router->wildcard(1)))
 	 * {
 	 *   $router->setTemplate('blog/category');
 	 * }
@@ -144,7 +178,7 @@ class Template_router {
 	/**
 	 * Check if the given category url title is valid
 	 *
-	 * if ($router->isValidCategoryUrlTitle($router->matches(1)))
+	 * if ($router->isValidCategoryUrlTitle($router->wildcard(1)))
 	 * {
 	 *   $router->setTemplate('blog/category');
 	 * }
@@ -164,7 +198,7 @@ class Template_router {
 	 * Check if the given entry is valid
 	 *
 	 * if ($router->isValidEntry(array(
-	 * 	 'url_title' => $router->matches(1),
+	 * 	 'url_title' => $router->wildcard(1),
 	 * 	 'channel' => 'blog',
 	 * 	 'status' => 'open',
 	 * ))
@@ -217,7 +251,7 @@ class Template_router {
 	/**
 	 * Check if the given entry id is valid
 	 *
-	 * if ($router->isValidEntryId($router->matches(1)))
+	 * if ($router->isValidEntryId($router->wildcard(1)))
 	 * {
 	 *   $router->setTemplate('blog/detail');
 	 * }
@@ -237,7 +271,7 @@ class Template_router {
 	 * Check if the given member is valid
 	 *
 	 * if ($router->isValidMember(array(
-	 * 	 'username' => $router->matches(1),
+	 * 	 'username' => $router->wildcard(1),
 	 * 	 'group_id' => 6,
 	 * ))
 	 * {
@@ -267,7 +301,7 @@ class Template_router {
 	/**
 	 * Check if the given member_id is valid
 	 *
-	 * if ($router->isValidMemberId($router->matches(1)))
+	 * if ($router->isValidMemberId($router->wildcard(1)))
 	 * {
 	 *   $router->setTemplate('users/detail');
 	 * }
@@ -286,7 +320,7 @@ class Template_router {
 	/**
 	 * Check if the given url title is valid
 	 *
-	 * if ($router->isValidUrlTitle($router->matches(1)))
+	 * if ($router->isValidUrlTitle($router->wildcard(1)))
 	 * {
 	 *   $router->setTemplate('blog/detail');
 	 * }
@@ -305,7 +339,7 @@ class Template_router {
 	/**
 	 * Check if the given username is valid
 	 *
-	 * if ($router->isValidUsername($router->matches(1)))
+	 * if ($router->isValidUsername($router->wildcard(1)))
 	 * {
 	 *   $router->setTemplate('users/detail');
 	 * }
@@ -339,11 +373,11 @@ class Template_router {
 	/**
 	 * Get the matched wildcards
 	 * 
-	 * @return [type] [description]
+	 * @return array
 	 */
-	public function matches()
+	public function wildcards()
 	{
-		return $this->matches;
+		return $this->wildcards;
 	}
 
 	/**
@@ -352,9 +386,9 @@ class Template_router {
 	 * @param  int $which the wildcard index
 	 * @return mixed|null null if doesn't exist
 	 */
-	public function match($which)
+	public function wildcard($which)
 	{
-		return array_key_exists($which, $this->matches) ? $this->matches[$which] : NULL;
+		return array_key_exists($which, $this->wildcards) ? $this->wildcards[$which] : NULL;
 	}
 
 	/**
@@ -370,7 +404,7 @@ class Template_router {
 
 		$output_type = ee()->output->out_type;
 
-		ee()->output->set_status_header($this->http_status);
+		ee()->output->set_status_header($this->status);
 
 		$override_types = array('webpage', 'css', 'js', 'xml', 'json');
 
@@ -440,8 +474,11 @@ class Template_router {
 		// normalize the uri_string
 		$uri_string = rtrim($uri_string, '/');
 
+		// start with an empty query_string
+		$query_string = '';
+
 		// check if this URI is a Pages URI
-		$this->is_page = in_array('/'.$uri_string, $this->page_uris);
+		$this->page = in_array('/'.$uri_string, $this->uris);
 
 		$found_match = FALSE;
 
@@ -458,9 +495,9 @@ class Template_router {
 			if ($wildcard !== FALSE)
 			{
 				// check for a :page:XX wildcard
-				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->page_uris[$match[1]]))
+				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->uris[$match[1]]))
 				{
-					$rule = str_replace($match[0], '('.ltrim($this->page_uris[$match[1]], '/').')', $rule);
+					$rule = str_replace($match[0], '('.ltrim($this->uris[$match[1]], '/').')', $rule);
 
 					// don't count a page uri as wildcard
 					$wildcard = strpos($rule, ':');
@@ -518,10 +555,10 @@ class Template_router {
 			$regex = '#^'.trim($regex, '/').'$#';
 
 			// check if the uri_string matches this route
-			if (preg_match($regex, $uri_string, $this->matches))
+			if (preg_match($regex, $uri_string, $this->wildcards))
 			{
 				//remove trailing/leading slashes from matches
-				$this->matches = array_map('trim_slashes', $this->matches);
+				$this->wildcards = array_map('trim_slashes', $this->wildcards);
 
 				if (is_callable($template))
 				{
@@ -542,7 +579,7 @@ class Template_router {
 						// normally gets set in Template::parse_template_uri(), but we are overriding that function here
 						// let's grab the bits of the uri that are dynamic and set that as the query_string
 						// e.g. blog/nested/here/:any => _blog/_view will yield a query_string of that final segment
-						$this->query_string = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
+						$query_string = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
 					}
 
 					break;
@@ -552,18 +589,18 @@ class Template_router {
 
 		if ($this->template)
 		{
-			if ($this->query_string)
+			if ($query_string)
 			{
-				ee()->uri->query_string = $this->query_string;
+				ee()->uri->query_string = $query_string;
 			}
 
 			// I want Structure's global variables set on urls that start with a pages URI
 			// so we tell structure that the uri_string is the first match in the regex
-			if ( ! $this->is_page && isset($this->matches[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->matches[1], $this->page_uris))
+			if ( ! $this->page && isset($this->wildcards[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->wildcards[1], $this->uris))
 			{
 				$temp_uri_string = ee()->uri->uri_string;
 
-				ee()->uri->uri_string = $this->matches[1];
+				ee()->uri->uri_string = $this->wildcards[1];
 
 				ee()->extensions->OBJ['Structure_ext']->sessions_start(ee()->session);
 
@@ -571,13 +608,13 @@ class Template_router {
 			}
 
 			// loop through the matched sub-strings
-			foreach ($this->matches as $i => $match)
+			foreach ($this->wildcards as $i => $wildcard)
 			{
 				// set each sub-string as a global template variable
-				$this->setGlobal('route_'.$i, $match);
+				$this->setGlobal('route_'.$i, $wildcard);
 
 				// replace any sub-string matches in the template definition
-				$this->template = str_replace('$'.$i, $match, $this->template);
+				$this->template = str_replace('$'.$i, $wildcard, $this->template);
 			}
 		}
 
@@ -666,7 +703,7 @@ class Template_router {
 	 */
 	public function setHttpStatus($code)
 	{
-		$this->http_status = $code;
+		$this->status = $code;
 
 		return $this;
 	}
