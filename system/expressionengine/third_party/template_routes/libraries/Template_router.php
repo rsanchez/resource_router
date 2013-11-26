@@ -92,9 +92,10 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  array   $where  where / where_in provided to CodeIgniter Active Record class
-	 * @return boolean is this a valid category
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
+	 * @return boolean|mixed is this a valid category|the value of the $return column, if specified
 	 */
-	public function isValidCategory($where)
+	public function isValidCategory($where, $return = NULL)
 	{
 		$joined = FALSE;
 
@@ -153,7 +154,27 @@ class Template_router {
 			}
 		}
 
-		return ee()->db->count_all_results('channel_titles') > 0;
+		ee()->db->from('categories');
+
+		if ($return)
+		{
+			$query = ee()->db->get();
+
+			if ($query->num_rows() > 0)
+			{
+				$return = $query->row($return);
+			}
+			else
+			{
+				$return = FALSE;
+			}
+
+			$query->free_result();
+
+			return $return;
+		}
+
+		return ee()->db->count_all_results() > 0;
 	}
 
 	/**
@@ -165,14 +186,12 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  string|int  $cat_id a category id
-	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid category
 	 */
-	public function isValidCategoryId($cat_id, $where = array())
+	public function isValidCategoryId($cat_id, $return = NULL)
 	{
-		$where['cat_id'] = $cat_id;
-
-		return $this->isValidCategory($where);
+		return $this->isValidCategory(array('cat_id' => $cat_id), $return);
 	}
 
 	/**
@@ -184,14 +203,12 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  string  $cat_url_title a category url title
-	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid category
 	 */
-	public function isValidCategoryUrlTitle($cat_url_title, $where = array())
+	public function isValidCategoryUrlTitle($cat_url_title, $return = NULL)
 	{
-		$where['cat_url_title'] = $cat_url_title;
-
-		return $this->isValidCategory($where);
+		return $this->isValidCategory(array('cat_url_title' => $cat_url_title), $return);
 	}
 
 	/**
@@ -207,9 +224,10 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  array   $where  where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid entry
 	 */
-	public function isValidEntry($where)
+	public function isValidEntry($where, $return = NULL)
 	{
 		$joined_data = FALSE;
 		$joined_channel = FALSE;
@@ -245,7 +263,27 @@ class Template_router {
 			}
 		}
 
-		return ee()->db->count_all_results('channel_titles') > 0;
+		ee()->db->from('channel_titles');
+
+		if ($return)
+		{
+			$query = ee()->db->get();
+
+			if ($query->num_rows() > 0)
+			{
+				$return = $query->row($return);
+			}
+			else
+			{
+				$return = FALSE;
+			}
+
+			$query->free_result();
+
+			return $return;
+		}
+
+		return ee()->db->count_all_results() > 0;
 	}
 
 	/**
@@ -257,14 +295,12 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  string  $entry_id
-	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid entry
 	 */
-	public function isValidEntryId($entry_id, $where = array())
+	public function isValidEntryId($entry_id, $return = NULL)
 	{
-		$where['entry_id'] = $entry_id;
-
-		return $this->isValidEntry($where);
+		return $this->isValidEntry(array('entry_id' => $entry_id), $return);
 	}
 
 	/**
@@ -279,9 +315,10 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  array   $where  where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid member
 	 */
-	public function isValidMember($where)
+	public function isValidMember($where, $return = NULL)
 	{
 		foreach ($where as $key => $value)
 		{
@@ -295,7 +332,27 @@ class Template_router {
 			}
 		}
 
-		return ee()->db->count_all_results('members') > 0;
+		ee()->db->from('members');
+
+		if ($return)
+		{
+			$query = ee()->db->get();
+
+			if ($query->num_rows() > 0)
+			{
+				$return = $query->row($return);
+			}
+			else
+			{
+				$return = FALSE;
+			}
+
+			$query->free_result();
+
+			return $return;
+		}
+
+		return ee()->db->count_all_results() > 0;
 	}
 
 	/**
@@ -307,14 +364,12 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  int  $member_id
-	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid member
 	 */
-	public function isValidMemberId($member_id, $where = array())
+	public function isValidMemberId($member_id, $return = NULL)
 	{
-		$where['member_id'] = $member_id;
-
-		return $this->isValidMember($where);
+		return $this->isValidMember(array('member_id' => $member_id), $return);
 	}
 
 	/**
@@ -326,14 +381,12 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  string  $url_title an entry url title
-	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid entry
 	 */
-	public function isValidUrlTitle($url_title, $where = array())
+	public function isValidUrlTitle($url_title, $return = NULL)
 	{
-		$where['url_title'] = $url_title;
-
-		return $this->isValidEntry($where);
+		return $this->isValidEntry(array('url_title' => $url_title), $return);
 	}
 
 	/**
@@ -345,14 +398,12 @@ class Template_router {
 	 * }
 	 * 
 	 * @param  string  $username
-	 * @param  array   $where  additional where / where_in provided to CodeIgniter Active Record class
+	 * @param  null|string $return  a column to return or NULL if you wish to return bool
 	 * @return boolean is this a valid member
 	 */
-	public function isValidUsername($username, $where = array())
+	public function isValidUsername($username, $return = NULL)
 	{
-		$where['username'] = $username;
-
-		return $this->isValidMember($where);
+		return $this->isValidMember(array('username' => $username), $return);
 	}
 
 	/**
