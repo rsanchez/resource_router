@@ -93,41 +93,269 @@ Don't forget to wrap in parentheses if you would like your regular expression to
 With PHP 5.3+, you can use callbacks in your routes:
 
 	$config['template_routes'] = array(
-		'blog/:any' => function($router, $route_1) {
-			return 'blog/single';
+		'blog/:any' => function($router) {
+			$router->setTemplate('blog/single');
 		} 
 	);
 
-Your callback should return a valid `template_group/template` string.
+Your callback should set a valid `template_group/template` string using the `$router->setTemplate()` method.
 
-Or you can return `FALSE` to signify that this url does *not* match the route:
+Or you can avoid setting a template to signify that this url does *not* match the route:
 
-	$config['template_routes'] = array(
-		'blog/:any' => function($router, $route_1) {
-			if ($route_1 === 'foo') {
-				return;
-			}
-			$router->setTemplate('blog/single');
+	'blog/:any' => function($router) {
+		if ($router->wildcard(1) === 'foo') {
+			return;
 		}
-	);
+		$router->setTemplate('blog/single');
+	}
+
+Return a string to immediately output that string and avoid the template engine:
+
+	'blog/:any' => function($router) {
+		return 'You found: '.$router->wildcard(1);
+	}
+
 
 The first argument in the callback is the router object. It has a few methods you can use.
 
-	$config['template_routes'] = array(
-		'blog/:any' => function($router, $route_1) {
-			// creates a {foo} global variable to use in your templates
-			$router->setGlobal('foo', 'bar');
+#### $router->wildcard($which)
 
-			// creates a set of variables to use in your templates
-			// {exp:template_routes:foo} {title} {slug} {/exp:template_routes:foo}
-			$router->setVariable('foo', array(
-				'title' => 'A title',
-				'slug' => 'a-title',
-			));
+	'blog/:any' => function($router) {
+		// get the value of :any
+		$url_title = $router->wildcard(1);
+	}
 
+#### $router->setTemplate($template)
+
+	'blog/:any' => function($router) {
+		// set the template to use for this URI
+		$router->setTemplate('template_group/template_name');
+	}
+
+#### $router->set404()
+
+	'blog/:any' => function($router) {
+		// invoke a 404 page using EE's 404 template
+		$router->set404();
+	}
+
+#### $router->setGlobal($key, $value)
+
+	'blog/:any' => function($router) {
+		// use this as a global variable in your template {foo} -> bar
+		$router->setGlobal('foo', 'bar');
+	}
+
+#### $router->setVariable($key, $value)
+
+	'blog/:any' => function($router) {
+		// use this as a plugin variable in your template {exp:template_routes:foo} -> bar
+		$router->setGlobal('foo', 'bar');
+
+		// use this as a plugin variable in your template {exp:template_routes:foo}{bar}{/exp:template_routes:foo} -> baz
+		$router->setGlobal('foo', array('bar' => 'baz'));
+	}
+
+#### $router->setWildcard($which, $value)
+
+	'blog/:any' => function($router) {
+		// change a wildcard global variable {route_1} -> bar
+		$router->setWildcard(1, 'bar');
+	}
+
+#### $router->setContentType($content_type)
+
+	'blog/:any' => function($router) {
+		$router->setContentType('application/json');
+		return '{"foo":"bar"}';
+	}
+
+#### $router->setHeader($name, $value)
+
+	'blog/:any' => function($router) {
+		$router->setHeader('Content-Type', 'application/json');
+		return '{"foo":"bar"}';
+	}
+
+#### $router->setHttpStatus($code)
+
+	'blog/:any' => function($router) {
+		// set a valid HTTP status code
+		$router->setHttpStatus(401);
+	}
+
+#### $router->json($data)
+
+	'blog/:any' => function($router) {
+		// return the specified data, json encoded, with Content-Type: application/json headers
+		$router->json(array('foo' => 'bar'));
+	}
+
+#### $router->isValidEntryId($entry_id)
+
+	'blog/:any' => function($router) {
+		// check if the entry_id is valid
+		$entry_id = $router->wildcard(1);
+
+		if ($router->isValidEntryId($entry_id))
+		{
+			$router->setTemplate('site/_blog_detail');
+		}
+		else
+		{
 			$router->set404();
-		} 
-	);
+		}
+	}
+
+#### $router->isValidUrlTitle($url_title)
+
+	'blog/:any' => function($router) {
+		// check if the url_title is valid
+		$url_title = $router->wildcard(1);
+
+		if ($router->isValidUrlTitle($url_title))
+		{
+			$router->setTemplate('site/_blog_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidEntry($where)
+
+	'blog/:any' => function($router) {
+		// check if the url_title is valid
+		$url_title = $router->wildcard(1);
+
+		if ($router->isValidEntry(array('url_title' => $url_title, 'status' => 'open')))
+		{
+			$router->setTemplate('site/_blog_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidCategoryId($cat_id)
+
+	'blog/:any' => function($router) {
+		// check if the cat_id is valid
+		$cat_id = $router->wildcard(1);
+
+		if ($router->isValidCategoryId($cat_id))
+		{
+			$router->setTemplate('site/_blog_category');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidCategoryUrlTitle($url_title)
+
+	'blog/:any' => function($router) {
+		// check if the cat_url_title is valid
+		$cat_url_title = $router->wildcard(1);
+
+		// use the second parameter to specify a column to retrieve data from
+		$cat_id = $router->isValidCategoryUrlTitle($cat_url_title, 'cat_id');
+
+		if ($cat_id !== FALSE)
+		{
+			$router->setWildcard(1, $cat_id);
+			$router->setTemplate('site/_blog_category');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidCategory($where)
+
+	'blog/:any' => function($router) {
+		// check if the cat_url_title is valid
+		$cat_url_title = $router->wildcard(1);
+
+		// use the second parameter to specify a column to retrieve data from
+		$cat_id = $router->isValidCategory(array(
+			'cat_url_title' => $cat_url_title,
+			'channel' => 'blog',
+		), 'cat_id');
+
+		if ($cat_id !== FALSE)
+		{
+			$router->setWildcard(1, $cat_id);
+			$router->setTemplate('site/_blog_category');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidMemberId($member_id)
+
+	'users/:num' => function($router) {
+		// check if the member_id is valid
+		$member_id = $router->wildcard(1);
+
+		if ($router->isValidMemberId($member_id))
+		{
+			$router->setTemplate('site/_user_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidUsername($username)
+
+	'users/:any' => function($router) {
+		// check if the username is valid
+		$username = $router->wildcard(1);
+
+		// use the second parameter to specify a column to retrieve data from
+		$member_id = $router->isValidUsername($username, 'member_id');
+
+		if ($member_id !== FALSE)
+		{
+			$router->setWildcard(1, $member_id);
+			$router->setTemplate('site/_user_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+#### $router->isValidMember($where)
+
+	'users/:any' => function($router) {
+		// check if the username is valid
+		$username = $router->wildcard(1);
+
+		// use the second parameter to specify a column to retrieve data from
+		$member_id = $router->isValidMember(array(
+			'username' => $username,
+			'group_id' => 5,
+		), 'member_id');
+
+		if ($member_id !== FALSE)
+		{
+			$router->setWildcard(1, $member_id);
+			$router->setTemplate('site/_user_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
 
 ### Examples
 
@@ -141,45 +369,30 @@ Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure
 		':page:123/:year/:month/:day' => 'site/_blog-daily',
 	);
 
-Use callbacks to validate categories in URLs and set a global variable:
+Use callbacks for highly custom URLs:
 
 	$config['template_routes'] = array(
 		'blog/:any' => function($router) {
-			$segment = $router->match(1);
+			$segment = $router->wildcard(1);
 
-			$query = ee()->db->select('cat_id')
-											 ->where('cat_url_title', $segment)
-											 ->where_in('group_id', array(1, 2))
-											 ->get('categories');
-
-			$cat_id = $query->row('cat_id');
-
-			$query->free_result();
-
-			if ($cat_id) {
-				// so you can:
-				// {exp:channel:entries channel="blog" category="{route_1_cat_id}"}
-				$router->setGlobal('route_1_cat_id', $query->row('cat_id'));
-
-				$router->setTemplate('blog/category');
+			// is it a url title?
+			if ($router->isValidUrlTitle($segment))
+			{
+				$router->setTemplate('site/_blog_detail');
 			}
-
-			$router->setTemplate('blog/single');
-		}
-	);
-
-	$config['template_routes'] = array(
-		'blog/:any' => function($router) {
-			$cat_id = $router->get_category(1, array('group_id' => 1));
-
-			if ($cat_id) {
-				// so you can:
-				// {exp:channel:entries channel="blog" category="{route_1_cat_id}"}
-				$router->setGlobal('route_1_cat_id', $query->row('cat_id'));
-
-				$router->setTemplate('blog/category');
+			else if (FALSE !== ($cat_id = $router->isValidCategoryUrlTitle($segment)))
+			{
+				$router->setWildcard(1, $cat_id);
+				$router->setTemplate('site/_blog_category');
 			}
-
-			$router->setTemplate('blog/single');
+			else if (FALSE !== ($member_id = $router->isValidUsername($segment)))
+			{
+				$router->setWildcard(1, $member_id);
+				$router->setTemplate('site/_blog_author');
+			}
+			else
+			{
+				$router->set404();
+			}
 		}
 	);
