@@ -15,13 +15,13 @@ class Template_router {
 	 * List of site Page URIs
 	 * @var array
 	 */
-	protected $uris = array();
+	protected $pageUris = array();
 
 	/**
 	 * HTTP Status code
 	 * @var integer
 	 */
-	protected $status = 200;
+	protected $httpStatus = 200;
 
 	/**
 	 * Template variables
@@ -33,13 +33,13 @@ class Template_router {
 	 * Is the matched URI a page URI?
 	 * @var boolean
 	 */
-	protected $page = FALSE;
+	protected $isPage = FALSE;
 
 	/**
 	 * The template to load
 	 * @var null|string
 	 */
-	protected $template = NULL;
+	protected $template;
 
 	/**
 	 * List of matched wildcards
@@ -64,10 +64,10 @@ class Template_router {
 
 		if (isset($site_pages[$site_id]['uris']))
 		{
-			$this->uris = $site_pages[$site_id]['uris'];
+			$this->pageUris = $site_pages[$site_id]['uris'];
 		}
 
-		ee()->load->helper(array('file', 'string'));
+		ee()->load->helper('string');
 	}
 
 	/**
@@ -77,7 +77,7 @@ class Template_router {
 	 */
 	public function isPage()
 	{
-		return $this->page;
+		return $this->isPage;
 	}
 
 	/**
@@ -455,7 +455,7 @@ class Template_router {
 
 		$output_type = ee()->output->out_type;
 
-		ee()->output->set_status_header($this->status);
+		ee()->output->set_status_header($this->httpStatus);
 
 		$override_types = array('webpage', 'css', 'js', 'xml', 'json');
 
@@ -529,7 +529,7 @@ class Template_router {
 		$query_string = '';
 
 		// check if this URI is a Pages URI
-		$this->page = in_array('/'.$uri_string, $this->uris);
+		$this->isPage = in_array('/'.$uri_string, $this->pageUris);
 
 		$found_match = FALSE;
 
@@ -546,9 +546,9 @@ class Template_router {
 			if ($wildcard !== FALSE)
 			{
 				// check for a :page:XX wildcard
-				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->uris[$match[1]]))
+				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->pageUris[$match[1]]))
 				{
-					$rule = str_replace($match[0], '('.ltrim($this->uris[$match[1]], '/').')', $rule);
+					$rule = str_replace($match[0], '('.ltrim($this->pageUris[$match[1]], '/').')', $rule);
 
 					// don't count a page uri as wildcard
 					$wildcard = strpos($rule, ':');
@@ -647,7 +647,7 @@ class Template_router {
 
 			// I want Structure's global variables set on urls that start with a pages URI
 			// so we tell structure that the uri_string is the first match in the regex
-			if ( ! $this->page && isset($this->wildcards[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->wildcards[1], $this->uris))
+			if ( ! $this->isPage && isset($this->wildcards[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->wildcards[1], $this->pageUris))
 			{
 				$temp_uri_string = ee()->uri->uri_string;
 
@@ -754,7 +754,7 @@ class Template_router {
 	 */
 	public function setHttpStatus($code)
 	{
-		$this->status = $code;
+		$this->httpStatus = $code;
 
 		return $this;
 	}
