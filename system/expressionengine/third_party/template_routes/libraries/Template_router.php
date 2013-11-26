@@ -816,6 +816,22 @@ class Template_router {
 	}
 
 	/**
+	 * Set a wildcard variable
+	 *
+	 * $router->setWildcard(1, 'foo');
+	 *
+	 * @param  int $which from 1 -> 10
+	 * @param  string $value the wildcard variable value
+	 * @return this
+	 */
+	public function setWildcard($which, $value)
+	{
+		$this->wildcards[$which] = $value;
+
+		return $this;
+	}
+
+	/**
 	 * Get the set template
 	 * 
 	 * @return mixed
