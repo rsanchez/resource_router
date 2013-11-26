@@ -361,13 +361,13 @@ class Template_router {
 	 * return $router->json(array('foo' => 'bar'));
 	 * 
 	 * @param  mixed $data
-	 * @return string
+	 * @return void
 	 */
 	public function json($data)
 	{
 		$this->setOutputType('json');
 
-		return json_encode($data);
+		return $this->output(json_encode($data));
 	}
 
 	/**
@@ -564,7 +564,7 @@ class Template_router {
 				{
 					$output = call_user_func($template, $this);
 
-					if ($output)
+					if ($output && is_string($output))
 					{
 						return $this->output($output);
 					}
