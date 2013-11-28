@@ -1,6 +1,8 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class Template_router {
+namespace Template_routes;
+
+class Router {
 
 	/**
 	 * List of routes

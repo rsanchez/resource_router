@@ -4,7 +4,7 @@ Control your URLs by remapping URI routes to a specific template, using [CodeIgn
 
 ## Installation
 
-*NOTE:* ExpressionEngine 2.6+ is required
+*NOTE:* ExpressionEngine 2.6+ and PHP 5.3 are required
 
 * Copy the /system/expressionengine/third_party/template_routes/ folder to your /system/expressionengine/third_party/ folder
 * Install the extension
@@ -90,7 +90,7 @@ Don't forget to wrap in parentheses if you would like your regular expression to
 
 ### Callbacks
 
-With PHP 5.3+, you can use callbacks in your routes:
+You can use callbacks in your routes:
 
 	$config['template_routes'] = array(
 		'blog/:any' => function($router) {

@@ -86,17 +86,16 @@ class Template_routes_ext {
 	 */
 	public function core_template_route($uri_string)
 	{
-		ee()->load->add_package_path(PATH_THIRD.'template_routes/');
+		//since EE doesn't have an autoloader
+		require_once PATH_THIRD.'template_routes/libraries/Template_routes/Router.php';
 
-		ee()->load->library('template_router');
+		$router = new \Template_routes\Router;
 
-		ee()->load->remove_package_path(PATH_THIRD.'template_routes/');
+		$router->run($uri_string);
 
-		ee()->template_router->run($uri_string);
+		$template = $router->template();
 
-		$template = ee()->template_router->template();
-
-		if ($template && ! ee()->template_router->isPage())
+		if ($template && ! $router->isPage())
 		{
 			// prevent other extensions from messing with us
 			ee()->extensions->end_script = TRUE;
