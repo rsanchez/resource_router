@@ -2,18 +2,9 @@
 
 class Template_routes
 {
-	public function __construct()
-	{
-		ee()->load->add_package_path(PATH_THIRD.'template_routes/');
-
-		ee()->load->library('template_router');
-
-		ee()->load->remove_package_path(PATH_THIRD.'template_routes/');
-	}
-
 	public function __call($name, $args)
 	{
-		$data = ee()->template_router->variable($name);
+		$data = ee()->session->cache('template_routes', $name);
 
 		if ( ! $data)
 		{

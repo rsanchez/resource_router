@@ -24,12 +24,6 @@ class Template_router {
 	protected $httpStatus = 200;
 
 	/**
-	 * Template variables
-	 * @var array
-	 */
-	protected $variables = array();
-
-	/**
 	 * Is the matched URI a page URI?
 	 * @var boolean
 	 */
@@ -815,7 +809,7 @@ class Template_router {
 	 */
 	public function setVariable($name, $data)
 	{
-		$this->variables[$name] = $data;
+		ee()->session->set_cache('template_routes', $name, $data);
 
 		return $this;
 	}
@@ -850,20 +844,10 @@ class Template_router {
 	 * Get the specified set variable
 	 * 
 	 * @param  string $which the variable key
-	 * @return mixed|null null if doesn't exist
+	 * @return mixed|false false if doesn't exist
 	 */
 	public function variable($which)
 	{
-		return array_key_exists($which, $this->variables) ? $this->variables[$which] : NULL;
-	}
-
-	/**
-	 * Get all set variables
-	 * 
-	 * @return array
-	 */
-	public function variables()
-	{
-		return $this->variables;
+		return ee()->session->cache('template_routes', $which);
 	}
 }
