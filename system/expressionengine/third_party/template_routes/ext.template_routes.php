@@ -89,19 +89,15 @@ class Template_routes_ext {
 		//since EE doesn't have an autoloader
 		require_once PATH_THIRD.'template_routes/libraries/Template_routes/Router.php';
 
-		$router = new \Template_routes\Router;
+		$router = new \Template_routes\Router($uri_string);
 
-		$router->run($uri_string);
-
-		$template = $router->template();
-
-		if ($template && ! $router->isPage())
+		if ($router->template() && ! $router->isPage())
 		{
 			// prevent other extensions from messing with us
 			ee()->extensions->end_script = TRUE;
 			
 			// set the route as array from the template string
-			return explode('/', $template);
+			return explode('/', $router->template());
 		}
 
 		// set the default route to any other extension calling this hook

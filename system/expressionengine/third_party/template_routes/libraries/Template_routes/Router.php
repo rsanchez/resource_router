@@ -43,7 +43,13 @@ class Router {
 	 */
 	protected $wildcards = array();
 
-	public function __construct()
+	/**
+	 * Constructor
+	 * 
+	 * @param  string $uri_string
+	 * @return void
+	 */
+	public function __construct($uri_string)
 	{
 		// get the routes array from the config file
 		$routes = ee()->config->item('template_routes');
@@ -64,6 +70,164 @@ class Router {
 		}
 
 		ee()->load->helper('string');
+
+		// set all the {route_X} variables to blank by default
+		for ($i = 0; $i <= 10; $i++)
+		{
+			$this->setGlobal('route_'.$i);
+		}
+
+		// normalize the uri_string
+		$uri_string = rtrim($uri_string, '/');
+
+		// start with an empty query_string
+		$query_string = '';
+
+		// check if this URI is a Pages URI
+		$this->isPage = in_array('/'.$uri_string, $this->pageUris);
+
+		$found_match = FALSE;
+
+		// loop through all the defined routes and check if the uri_string is a match
+		foreach($this->routes as $rule => $template)
+		{
+			// normalize the rule
+			$rule = rtrim($rule, '/');
+
+			// does the rule have any wildcards?
+			$wildcard = strpos($rule, ':');
+
+			// build the regex from the rule wildcard(s)
+			if ($wildcard !== FALSE)
+			{
+				// check for a :page:XX wildcard
+				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->pageUris[$match[1]]))
+				{
+					$rule = str_replace($match[0], '('.ltrim($this->pageUris[$match[1]], '/').')', $rule);
+
+					// don't count a page uri as wildcard
+					$wildcard = strpos($rule, ':');
+				}
+
+				$regex = str_replace(
+					array(
+						'(:any)',
+						':any',
+						'(:num)',
+						':num',
+						'(:year)',
+						':year',
+						'(:month)',
+						':month',
+						'(:day)',
+						':day',
+						'(:category)',
+						':category',
+						'/(:pagination)',
+						'/:pagination',
+						'(:pagination)',
+						':pagination',
+						'/(:all)',
+						'/:all',
+					),
+					array(
+						'([^/]+)',
+						'([^/]+)',
+						'(\d+)',
+						'(\d+)',
+						'(\d{4})',
+						'(\d{4})',
+						'(\d{2})',
+						'(\d{2})',
+						'(\d{2})',
+						'(\d{2})',
+						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
+						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
+						'(/P\d+)?',
+						'(/P\d+)?',
+						'(/P\d+)?',
+						'(/P\d+)?',
+						'(/.*)?',
+						'(/.*)?',
+					),
+					$rule
+				);
+			}
+			else
+			{
+				$regex = $rule;
+			}
+
+			$regex = '#^'.trim($regex, '/').'$#';
+
+			// check if the uri_string matches this route
+			if (preg_match($regex, $uri_string, $this->wildcards))
+			{
+				//remove trailing/leading slashes from matches
+				$this->wildcards = array_map('trim_slashes', $this->wildcards);
+
+				if (is_string($template))
+				{
+					$this->setTemplate($template);
+				}
+
+				if (is_callable($template))
+				{
+					$output = call_user_func($template, $this);
+
+					if ($output && is_string($output))
+					{
+						return $this->output($output);
+					}
+				}
+
+				if ($this->template)
+				{
+					// check if it has wildcards
+					if ($wildcard !== FALSE)
+					{
+						// the channel module uses this query_string property to do its dynamic stuff
+						// normally gets set in Template::parse_template_uri(), but we are overriding that function here
+						// let's grab the bits of the uri that are dynamic and set that as the query_string
+						// e.g. blog/nested/here/:any => _blog/_view will yield a query_string of that final segment
+						$query_string = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
+					}
+
+					break;
+				}
+			}
+		}
+
+		if ($this->template)
+		{
+			if ($query_string)
+			{
+				ee()->uri->query_string = $query_string;
+			}
+
+			// I want Structure's global variables set on urls that start with a pages URI
+			// so we tell structure that the uri_string is the first match in the regex
+			if ( ! $this->isPage && isset($this->wildcards[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->wildcards[1], $this->pageUris))
+			{
+				$temp_uri_string = ee()->uri->uri_string;
+
+				ee()->uri->uri_string = $this->wildcards[1];
+
+				ee()->extensions->OBJ['Structure_ext']->sessions_start(ee()->session);
+
+				ee()->uri->uri_string = $temp_uri_string;
+			}
+
+			// loop through the matched sub-strings
+			foreach ($this->wildcards as $i => $wildcard)
+			{
+				// set each sub-string as a global template variable
+				$this->setGlobal('route_'.$i, $wildcard);
+
+				// replace any sub-string matches in the template definition
+				$this->template = str_replace('$'.$i, $wildcard, $this->template);
+			}
+		}
 	}
 
 	/**
@@ -502,175 +666,6 @@ class Router {
 		// End from CodeIgniter.php
 
 		exit;
-	}
-
-	/**
-	 * Run the router against a uri_string
-	 * 
-	 * @param  string $uri_string
-	 * @return this
-	 */
-	public function run($uri_string)
-	{
-		// set all the {route_X} variables to blank by default
-		for ($i = 0; $i <= 10; $i++)
-		{
-			$this->setGlobal('route_'.$i);
-		}
-
-		// normalize the uri_string
-		$uri_string = rtrim($uri_string, '/');
-
-		// start with an empty query_string
-		$query_string = '';
-
-		// check if this URI is a Pages URI
-		$this->isPage = in_array('/'.$uri_string, $this->pageUris);
-
-		$found_match = FALSE;
-
-		// loop through all the defined routes and check if the uri_string is a match
-		foreach($this->routes as $rule => $template)
-		{
-			// normalize the rule
-			$rule = rtrim($rule, '/');
-
-			// does the rule have any wildcards?
-			$wildcard = strpos($rule, ':');
-
-			// build the regex from the rule wildcard(s)
-			if ($wildcard !== FALSE)
-			{
-				// check for a :page:XX wildcard
-				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->pageUris[$match[1]]))
-				{
-					$rule = str_replace($match[0], '('.ltrim($this->pageUris[$match[1]], '/').')', $rule);
-
-					// don't count a page uri as wildcard
-					$wildcard = strpos($rule, ':');
-				}
-
-				$regex = str_replace(
-					array(
-						'(:any)',
-						':any',
-						'(:num)',
-						':num',
-						'(:year)',
-						':year',
-						'(:month)',
-						':month',
-						'(:day)',
-						':day',
-						'(:category)',
-						':category',
-						'/(:pagination)',
-						'/:pagination',
-						'(:pagination)',
-						':pagination',
-						'/(:all)',
-						'/:all',
-					),
-					array(
-						'([^/]+)',
-						'([^/]+)',
-						'(\d+)',
-						'(\d+)',
-						'(\d{4})',
-						'(\d{4})',
-						'(\d{2})',
-						'(\d{2})',
-						'(\d{2})',
-						'(\d{2})',
-						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
-						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
-						'(/P\d+)?',
-						'(/P\d+)?',
-						'(/P\d+)?',
-						'(/P\d+)?',
-						'(/.*)?',
-						'(/.*)?',
-					),
-					$rule
-				);
-			}
-			else
-			{
-				$regex = $rule;
-			}
-
-			$regex = '#^'.trim($regex, '/').'$#';
-
-			// check if the uri_string matches this route
-			if (preg_match($regex, $uri_string, $this->wildcards))
-			{
-				//remove trailing/leading slashes from matches
-				$this->wildcards = array_map('trim_slashes', $this->wildcards);
-
-				if (is_string($template))
-				{
-					$this->setTemplate($template);
-				}
-
-				if (is_callable($template))
-				{
-					$output = call_user_func($template, $this);
-
-					if ($output && is_string($output))
-					{
-						return $this->output($output);
-					}
-				}
-
-				if ($this->template)
-				{
-					// check if it has wildcards
-					if ($wildcard !== FALSE)
-					{
-						// the channel module uses this query_string property to do its dynamic stuff
-						// normally gets set in Template::parse_template_uri(), but we are overriding that function here
-						// let's grab the bits of the uri that are dynamic and set that as the query_string
-						// e.g. blog/nested/here/:any => _blog/_view will yield a query_string of that final segment
-						$query_string = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
-					}
-
-					break;
-				}
-			}
-		}
-
-		if ($this->template)
-		{
-			if ($query_string)
-			{
-				ee()->uri->query_string = $query_string;
-			}
-
-			// I want Structure's global variables set on urls that start with a pages URI
-			// so we tell structure that the uri_string is the first match in the regex
-			if ( ! $this->isPage && isset($this->wildcards[1]) && isset(ee()->extensions->OBJ['Structure_ext']) && in_array('/'.$this->wildcards[1], $this->pageUris))
-			{
-				$temp_uri_string = ee()->uri->uri_string;
-
-				ee()->uri->uri_string = $this->wildcards[1];
-
-				ee()->extensions->OBJ['Structure_ext']->sessions_start(ee()->session);
-
-				ee()->uri->uri_string = $temp_uri_string;
-			}
-
-			// loop through the matched sub-strings
-			foreach ($this->wildcards as $i => $wildcard)
-			{
-				// set each sub-string as a global template variable
-				$this->setGlobal('route_'.$i, $wildcard);
-
-				// replace any sub-string matches in the template definition
-				$this->template = str_replace('$'.$i, $wildcard, $this->template);
-			}
-		}
-
-		return $this;
 	}
 
 	/**
