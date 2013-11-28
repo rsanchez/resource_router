@@ -43,14 +43,9 @@ class Template_routes_ext {
 	public function __construct($settings = '')
 	{
 		$this->settings = $settings;
+	}
 
-		if ( ! $this->cache_path = ee()->config->slash_item('cache_path'))
-		{
-			$this->cache_path = APPPATH.'cache/';
-		}
-
-		$this->cache_path .= 'template_routes/';
-	}// ----------------------------------------------------------------------
+	// ----------------------------------------------------------------------
 	
 	/**
 	 * Activate Extension
