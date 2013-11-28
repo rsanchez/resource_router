@@ -4,7 +4,7 @@ Control your URLs by remapping URI routes to a specific template, using [CodeIgn
 
 ## Installation
 
-*NOTE:* ExpressionEngine 2.6+ and PHP 5.3 are required
+*NOTE:* ExpressionEngine 2.6+ and PHP 5.3+ are required
 
 * Copy the /system/expressionengine/third_party/template_routes/ folder to your /system/expressionengine/third_party/ folder
 * Install the extension
@@ -67,7 +67,7 @@ Matches all possible segments.
 
 ### Matches
 
-All wildcards and any parenthesized regular expression pattersn will be available within your template as a tag variable:
+All wildcards and any parenthesized regular expression patterns will be available within your template as a tag variable:
 
 	{route_1} - the first wildcard/parenthesized match
 	{route_2} - the 2nd, and so forth
@@ -118,80 +118,104 @@ Return a string to immediately output that string and avoid the template engine:
 
 The first argument in the callback is the router object. It has a few methods you can use.
 
-#### $router->wildcard($which)
+#### $router->wildcard(int $which)
 
-	'blog/:any' => function($router) {
-		// get the value of :any
+Get the specified wildcard, starting from index 1. Similar to ee()->uri->segment(1).
+
+	'blog/:any/:num' => function($router) {
+		// get the first wildcard
 		$url_title = $router->wildcard(1);
 	}
 
-#### $router->setTemplate($template)
+#### $router->setTemplate(string $template)
+
+Set the `template_group/template_name` to use for this URI
 
 	'blog/:any' => function($router) {
-		// set the template to use for this URI
 		$router->setTemplate('template_group/template_name');
 	}
 
 #### $router->set404()
 
+Trigger your EE 404 template.
+
 	'blog/:any' => function($router) {
-		// invoke a 404 page using EE's 404 template
 		$router->set404();
 	}
 
-#### $router->setGlobal($key, $value)
+#### $router->setGlobal(string $key, string|int|bool $value)
+
+Set a global variable to use in your template.
 
 	'blog/:any' => function($router) {
-		// use this as a global variable in your template {foo} -> bar
+		// {foo} -> bar
 		$router->setGlobal('foo', 'bar');
 	}
 
-#### $router->setVariable($key, $value)
+#### $router->setVariable(string $key, mixed $value)
+
+Set tag pair arrays to use as variables in your template.
 
 	'blog/:any' => function($router) {
-		// use this as a plugin variable in your template {exp:template_routes:foo} -> bar
-		$router->setGlobal('foo', 'bar');
+		// {exp:template_routes:foo} -> bar
+		$router->setVariable('foo', 'bar');
 
-		// use this as a plugin variable in your template {exp:template_routes:foo}{bar}{/exp:template_routes:foo} -> baz
-		$router->setGlobal('foo', array('bar' => 'baz'));
+		// {exp:template_routes:foo}{bar}-{baz}{/exp:template_routes:foo} -> abc-def
+		$router->setVariable('foo', array('bar' => 'abc', 'baz' => 'def'));
+
+		// {exp:template_routes:foo}{bar}-{baz},{/exp:template_routes:foo} -> abc-def,ghi-jkl,
+		$router->setVariable('foo', array(
+			array('bar' => 'abc', 'baz' => 'def'),
+			array('bar' => 'ghi', 'baz' => 'jkl'),
+		));
 	}
 
-#### $router->setWildcard($which, $value)
+#### $router->setWildcard(int $which, string|int|bool $value)
+
+Change the value of a wildcard at the specified index.
 
 	'blog/:any' => function($router) {
 		// change a wildcard global variable {route_1} -> bar
 		$router->setWildcard(1, 'bar');
 	}
 
-#### $router->setContentType($content_type)
+#### $router->setContentType(string $content_type)
+
+Change the Content-Type HTTP response header.
 
 	'blog/:any' => function($router) {
 		$router->setContentType('application/json');
 		return '{"foo":"bar"}';
 	}
 
-#### $router->setHeader($name, $value)
+#### $router->setHeader(string $name, string $value)
+
+Set an HTTP response header.
 
 	'blog/:any' => function($router) {
 		$router->setHeader('Content-Type', 'application/json');
 		return '{"foo":"bar"}';
 	}
 
-#### $router->setHttpStatus($code)
+#### $router->setHttpStatus(int $code)
+
+Set the HTTP response status code.
 
 	'blog/:any' => function($router) {
-		// set a valid HTTP status code
 		$router->setHttpStatus(401);
 	}
 
-#### $router->json($data)
+#### $router->json(mixed $data)
+
+Send a JSON response of the data wwith Content-Type: application/json headers
 
 	'blog/:any' => function($router) {
-		// return the specified data, json encoded, with Content-Type: application/json headers
 		$router->json(array('foo' => 'bar'));
 	}
 
-#### $router->isValidEntryId($entry_id)
+#### $router->isValidEntryId(int $entry_id)
+
+Check if the specified entry_id exists.
 
 	'blog/:any' => function($router) {
 		// check if the entry_id is valid
@@ -207,7 +231,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidUrlTitle($url_title)
+#### $router->isValidUrlTitle(string $url_title)
+
+Check if the specified url_title exists.
 
 	'blog/:any' => function($router) {
 		// check if the url_title is valid
@@ -223,7 +249,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidEntry($where)
+#### $router->isValidEntry(array $where)
+
+Check if the specified entry exists.
 
 	'blog/:any' => function($router) {
 		// check if the url_title is valid
@@ -239,7 +267,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidCategoryId($cat_id)
+#### $router->isValidCategoryId(int $cat_id)
+
+Check if the specified cat_id exists.
 
 	'blog/:any' => function($router) {
 		// check if the cat_id is valid
@@ -255,7 +285,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidCategoryUrlTitle($url_title)
+#### $router->isValidCategoryUrlTitle(string $url_title)
+
+Check if the specified category url_title exists.
 
 	'blog/:any' => function($router) {
 		// check if the cat_url_title is valid
@@ -266,7 +298,8 @@ The first argument in the callback is the router object. It has a few methods yo
 
 		if ($cat_id !== FALSE)
 		{
-			$router->setWildcard(1, $cat_id);
+			//set a variable of the cat_id that we can use in our templates
+			$router->setGlobal('route_1_cat_id', $cat_id);
 			$router->setTemplate('site/_blog_category');
 		}
 		else
@@ -275,7 +308,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidCategory($where)
+#### $router->isValidCategory(array $where)
+
+Check if the specified category exists.
 
 	'blog/:any' => function($router) {
 		// check if the cat_url_title is valid
@@ -289,7 +324,8 @@ The first argument in the callback is the router object. It has a few methods yo
 
 		if ($cat_id !== FALSE)
 		{
-			$router->setWildcard(1, $cat_id);
+			//set a variable of the cat_id that we can use in our templates
+			$router->setGlobal('route_1_cat_id', $cat_id);
 			$router->setTemplate('site/_blog_category');
 		}
 		else
@@ -298,7 +334,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidMemberId($member_id)
+#### $router->isValidMemberId(int $member_id)
+
+Check if the specified member_id exists.
 
 	'users/:num' => function($router) {
 		// check if the member_id is valid
@@ -314,7 +352,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidUsername($username)
+#### $router->isValidUsername(string $username)
+
+Check if the specified username exists.
 
 	'users/:any' => function($router) {
 		// check if the username is valid
@@ -325,7 +365,6 @@ The first argument in the callback is the router object. It has a few methods yo
 
 		if ($member_id !== FALSE)
 		{
-			$router->setWildcard(1, $member_id);
 			$router->setTemplate('site/_user_detail');
 		}
 		else
@@ -334,7 +373,9 @@ The first argument in the callback is the router object. It has a few methods yo
 		}
 	}
 
-#### $router->isValidMember($where)
+#### $router->isValidMember(array $where)
+
+Check if the specified member exists.
 
 	'users/:any' => function($router) {
 		// check if the username is valid
@@ -348,7 +389,6 @@ The first argument in the callback is the router object. It has a few methods yo
 
 		if ($member_id !== FALSE)
 		{
-			$router->setWildcard(1, $member_id);
 			$router->setTemplate('site/_user_detail');
 		}
 		else
@@ -380,14 +420,15 @@ Use callbacks for highly custom URLs:
 			{
 				$router->setTemplate('site/_blog_detail');
 			}
+			// is it a category url title?
 			else if (FALSE !== ($cat_id = $router->isValidCategoryUrlTitle($segment)))
 			{
-				$router->setWildcard(1, $cat_id);
+				$router->setGlobal('route_1_cat_id', $cat_id);
 				$router->setTemplate('site/_blog_category');
 			}
+			// is it a username?
 			else if (FALSE !== ($member_id = $router->isValidUsername($segment)))
 			{
-				$router->setWildcard(1, $member_id);
 				$router->setTemplate('site/_blog_author');
 			}
 			else
