@@ -65,6 +65,30 @@ Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_
 
 Matches all possible segments.
 
+#### :entry_id
+
+Matches an entry id. Does not match if the entry id is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+
+#### :url_title
+
+Matches a url title. Does not match if the url title is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+
+#### :category_id
+
+Matches a category id. Does not match if the category id is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+
+#### :category_url_title
+
+Matches a category url title. Does not match if the category url title is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+
+#### :member_id
+
+Matches a member id. Does not match if the member id is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+
+#### :username
+
+Matches a username. Does not match if the username is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+
 ### Matches
 
 All wildcards and any parenthesized regular expression patterns will be available within your template as a tag variable:
@@ -93,7 +117,7 @@ Don't forget to wrap in parentheses if you would like your regular expression to
 You can use callbacks in your routes:
 
 	$config['template_routes'] = array(
-		'blog/:any' => function($router) {
+		'blog/:any/:any' => function($router, $wildcard_1, $wildcard_2) {
 			$router->setTemplate('blog/single');
 		} 
 	);
@@ -102,8 +126,8 @@ Your callback should set a valid `template_group/template` string using the `$ro
 
 Or you can avoid setting a template to signify that this url does *not* match the route:
 
-	'blog/:any' => function($router) {
-		if ($router->wildcard(1) === 'foo') {
+	'blog/:any' => function($router, $wildcard) {
+		if ($wildcard->value() === 'foo') {
 			return;
 		}
 		$router->setTemplate('blog/single');
@@ -111,23 +135,15 @@ Or you can avoid setting a template to signify that this url does *not* match th
 
 Return a string to immediately output that string and avoid the template engine:
 
-	'blog/:any' => function($router) {
-		return 'You found: '.$router->wildcard(1);
+	'blog/:any' => function($router, $wildcard) {
+		return 'You found: '.$wildcard;
 	}
 
+#### $router
 
 The first argument in the callback is the router object. It has a few methods you can use.
 
-#### $router->wildcard(int $which)
-
-Get the specified wildcard, starting from index 1. Similar to ee()->uri->segment(1).
-
-	'blog/:any/:num' => function($router) {
-		// get the first wildcard
-		$url_title = $router->wildcard(1);
-	}
-
-#### $router->setTemplate(string $template)
+##### $router->setTemplate(string $template)
 
 Set the `template_group/template_name` to use for this URI
 
@@ -135,7 +151,7 @@ Set the `template_group/template_name` to use for this URI
 		$router->setTemplate('template_group/template_name');
 	}
 
-#### $router->set404()
+##### $router->set404()
 
 Trigger your EE 404 template.
 
@@ -143,7 +159,7 @@ Trigger your EE 404 template.
 		$router->set404();
 	}
 
-#### $router->setGlobal(string $key, string|int|bool $value)
+##### $router->setGlobal(string $key, string|int|bool $value)
 
 Set a global variable to use in your template.
 
@@ -152,7 +168,7 @@ Set a global variable to use in your template.
 		$router->setGlobal('foo', 'bar');
 	}
 
-#### $router->setVariable(string $key, mixed $value)
+##### $router->setVariable(string $key, mixed $value)
 
 Set tag pair arrays to use as variables in your template.
 
@@ -170,7 +186,7 @@ Set tag pair arrays to use as variables in your template.
 		));
 	}
 
-#### $router->setWildcard(int $which, string|int|bool $value)
+##### $router->setWildcard(int $which, string|int|bool $value)
 
 Change the value of a wildcard at the specified index.
 
@@ -179,7 +195,7 @@ Change the value of a wildcard at the specified index.
 		$router->setWildcard(1, 'bar');
 	}
 
-#### $router->setContentType(string $content_type)
+##### $router->setContentType(string $content_type)
 
 Change the Content-Type HTTP response header.
 
@@ -188,7 +204,7 @@ Change the Content-Type HTTP response header.
 		return '{"foo":"bar"}';
 	}
 
-#### $router->setHeader(string $name, string $value)
+##### $router->setHeader(string $name, string $value)
 
 Set an HTTP response header.
 
@@ -197,7 +213,7 @@ Set an HTTP response header.
 		return '{"foo":"bar"}';
 	}
 
-#### $router->setHttpStatus(int $code)
+##### $router->setHttpStatus(int $code)
 
 Set the HTTP response status code.
 
@@ -205,7 +221,7 @@ Set the HTTP response status code.
 		$router->setHttpStatus(401);
 	}
 
-#### $router->json(mixed $data)
+##### $router->json(mixed $data)
 
 Send a JSON response of the data wwith Content-Type: application/json headers
 
@@ -213,15 +229,24 @@ Send a JSON response of the data wwith Content-Type: application/json headers
 		$router->json(array('foo' => 'bar'));
 	}
 
-#### $router->isValidEntryId(int $entry_id)
+#### $wildcard
+
+The second and subsequent callback arguments are `Wildcard` objects.
+
+##### $wildcard->value
+
+Get the value of the wildcard match.
+
+  'blog/:any/:any' => function($router, $wildcard_1, $wildcard_2) {
+	  $last_segment = $wildcard_2->value;
+	}
+
+##### $wildcard->isValidEntryId($where = array())
 
 Check if the specified entry_id exists.
 
-	'blog/:any' => function($router) {
-		// check if the entry_id is valid
-		$entry_id = $router->wildcard(1);
-
-		if ($router->isValidEntryId($entry_id))
+	'blog/:num' => function($router, $wildcard) {
+		if ($wildcard->isValidEntryId())
 		{
 			$router->setTemplate('site/_blog_detail');
 		}
@@ -231,15 +256,12 @@ Check if the specified entry_id exists.
 		}
 	}
 
-#### $router->isValidUrlTitle(string $url_title)
+##### $wildcard->isValidUrlTitle($where = array())
 
 Check if the specified url_title exists.
 
-	'blog/:any' => function($router) {
-		// check if the url_title is valid
-		$url_title = $router->wildcard(1);
-
-		if ($router->isValidUrlTitle($url_title))
+	'blog/:any' => function($router, $wildcard) {
+		if ($wildcard->isValidUrlTitle())
 		{
 			$router->setTemplate('site/_blog_detail');
 		}
@@ -249,15 +271,23 @@ Check if the specified url_title exists.
 		}
 	}
 
-#### $router->isValidEntry(array $where)
+	'blog/:any' => function($router, $wildcard) {
+		if ($wildcard->isValidUrlTitle(array('status' => 'open')))
+		{
+			$router->setTemplate('site/_blog_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
+##### $router->isValidEntry(array $where)
 
 Check if the specified entry exists.
 
-	'blog/:any' => function($router) {
-		// check if the url_title is valid
-		$url_title = $router->wildcard(1);
-
-		if ($router->isValidEntry(array('url_title' => $url_title, 'status' => 'open')))
+	'blog/:any' => function($router, $wildcard) {
+		if ($router->isValidEntry(array('url_title' => $wildcard->value, 'status' => 'open')))
 		{
 			$router->setTemplate('site/_blog_detail');
 		}
@@ -267,15 +297,12 @@ Check if the specified entry exists.
 		}
 	}
 
-#### $router->isValidCategoryId(int $cat_id)
+##### $wildcard->isValidCategoryId($where = array())
 
-Check if the specified cat_id exists.
+Check if the specified cat_id exists. If a match is found, this will automatically set global variables for the category data in the form {route_X_column_name}, eg. {route_1_cat_id} {route_2_cat_name}.
 
-	'blog/:any' => function($router) {
-		// check if the cat_id is valid
-		$cat_id = $router->wildcard(1);
-
-		if ($router->isValidCategoryId($cat_id))
+	'blog/:any' => function($router, $wildcard) {
+		if ($wildcard->isValidCategoryId())
 		{
 			$router->setTemplate('site/_blog_category');
 		}
@@ -285,21 +312,13 @@ Check if the specified cat_id exists.
 		}
 	}
 
-#### $router->isValidCategoryUrlTitle(string $url_title)
+##### $wildcard->isValidCategoryUrlTitle($where = array())
 
-Check if the specified category url_title exists.
+Check if the specified category url_title exists. If a match is found, this will automatically set global variables for the category data in the form {route_X_column_name}, eg. {route_1_cat_id} {route_2_cat_name}.
 
-	'blog/:any' => function($router) {
-		// check if the cat_url_title is valid
-		$cat_url_title = $router->wildcard(1);
-
-		// use the second parameter to specify a column to retrieve data from
-		$cat_id = $router->isValidCategoryUrlTitle($cat_url_title, 'cat_id');
-
-		if ($cat_id !== FALSE)
+	'blog/:any' => function($router, $wildcard) {
+		if ($wildcard->isValidCategoryUrlTitle())
 		{
-			//set a variable of the cat_id that we can use in our templates
-			$router->setGlobal('route_1_cat_id', $cat_id);
 			$router->setTemplate('site/_blog_category');
 		}
 		else
@@ -308,24 +327,19 @@ Check if the specified category url_title exists.
 		}
 	}
 
-#### $router->isValidCategory(array $where)
+##### $wildcard->isValidCategory(array $where)
 
-Check if the specified category exists.
+Check if the specified category exists. If a match is found, this will automatically set global variables for the category data in the form {route_X_column_name}, eg. {route_1_cat_id} {route_2_cat_name}.
 
-	'blog/:any' => function($router) {
-		// check if the cat_url_title is valid
-		$cat_url_title = $router->wildcard(1);
-
+	'blog/:any' => function($router, $wildcard) {
 		// use the second parameter to specify a column to retrieve data from
-		$cat_id = $router->isValidCategory(array(
-			'cat_url_title' => $cat_url_title,
+		$valid = $wildcard->isValidCategory(array(
+			'cat_url_title' => $wildcard->value,
 			'channel' => 'blog',
-		), 'cat_id');
+		));
 
-		if ($cat_id !== FALSE)
+		if ($valid)
 		{
-			//set a variable of the cat_id that we can use in our templates
-			$router->setGlobal('route_1_cat_id', $cat_id);
 			$router->setTemplate('site/_blog_category');
 		}
 		else
@@ -334,15 +348,12 @@ Check if the specified category exists.
 		}
 	}
 
-#### $router->isValidMemberId(int $member_id)
+##### $wildcard->isValidMemberId($where = array())
 
 Check if the specified member_id exists.
 
-	'users/:num' => function($router) {
-		// check if the member_id is valid
-		$member_id = $router->wildcard(1);
-
-		if ($router->isValidMemberId($member_id))
+	'users/:num' => function($router, $wildcard) {
+		if ($wildcard->isValidMemberId())
 		{
 			$router->setTemplate('site/_user_detail');
 		}
@@ -352,18 +363,12 @@ Check if the specified member_id exists.
 		}
 	}
 
-#### $router->isValidUsername(string $username)
+##### $wildcard->isValidUsername($where = array())
 
 Check if the specified username exists.
 
-	'users/:any' => function($router) {
-		// check if the username is valid
-		$username = $router->wildcard(1);
-
-		// use the second parameter to specify a column to retrieve data from
-		$member_id = $router->isValidUsername($username, 'member_id');
-
-		if ($member_id !== FALSE)
+	'users/:any' => function($router, $wildcard) {
+		if ($wildcard->isValidUsername())
 		{
 			$router->setTemplate('site/_user_detail');
 		}
@@ -373,21 +378,18 @@ Check if the specified username exists.
 		}
 	}
 
-#### $router->isValidMember(array $where)
+##### $wildcard->isValidMember(array $where)
 
 Check if the specified member exists.
 
-	'users/:any' => function($router) {
-		// check if the username is valid
-		$username = $router->wildcard(1);
-
+	'users/:any' => function($router, $wildcard) {
 		// use the second parameter to specify a column to retrieve data from
-		$member_id = $router->isValidMember(array(
-			'username' => $username,
+		$valid = $router->isValidMember(array(
+			'username' => $wildcard->value,
 			'group_id' => 5,
-		), 'member_id');
+		));
 
-		if ($member_id !== FALSE)
+		if ($valid)
 		{
 			$router->setTemplate('site/_user_detail');
 		}

@@ -88,6 +88,7 @@ class Template_routes_ext {
 	{
 		//since EE doesn't have an autoloader
 		require_once PATH_THIRD.'template_routes/libraries/Template_routes/Router.php';
+		require_once PATH_THIRD.'template_routes/libraries/Template_routes/Wildcard.php';
 
 		$router = new \Template_routes\Router($uri_string);
 
