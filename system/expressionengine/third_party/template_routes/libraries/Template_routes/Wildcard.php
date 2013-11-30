@@ -5,20 +5,40 @@ namespace Template_routes;
 use \Template_routes\Router;
 
 class Wildcard {
-	public $value;
-	public $type;
-
+	/**
+	 * The router who created this instance
+	 */
 	protected $router;
+
+	/**
+	 * The index of this wildcard in the parent router wildcards array
+	 */
 	protected $index;
+
+	/**
+	 * The value found in the URL for this matching wildcard.
+	 */
+	public $value;
+
+	/**
+	 * The type of wildcard, eg any, num, entry_id, etc.
+	 */
+	public $type;
 
 	public function __construct(Router $router, $index, $value, $type)
 	{
 		$this->router = $router;
-		$this->value = $value;
 		$this->index = $index;
+		$this->value = $value;
 		$this->type = $type;
 	}
 
+	/**
+	 * Validate according to type
+	 *
+	 * @param array $where  additional columns to match in the query
+	 * @return bool
+	 */
 	public function isValid($where = array())
 	{
 		switch($this->type)
@@ -111,6 +131,11 @@ class Wildcard {
 				$joined = TRUE;
 			}
 
+			if ($key === 'cat_id')
+			{
+				$key = 'categories.cat_id';
+			}
+
 			if (is_array($value))
 			{
 				ee()->db->where_in($key, $value);
@@ -125,7 +150,7 @@ class Wildcard {
 
 		$return = $query->num_rows() > 0;
 
-		// seg2cat except route2cat
+		// route2cat
 		if ($return)
 		{
 			foreach ($query->row_array() as $key => $value)
@@ -183,8 +208,16 @@ class Wildcard {
 
 					$joined_channel = TRUE;
 				}
+			}
 
-				$key = 'channel_name';
+			if ($key === 'channel_id')
+			{
+				$key = 'channel_titles.channel_id';
+			}
+
+			if ($key === 'entry_id')
+			{
+				$key = 'channel_titles.entry_id';
 			}
 
 			if (is_array($value))
@@ -337,11 +370,6 @@ class Wildcard {
 		$where['username'] = $this->value;
 
 		return $this->isValidMember($where);
-	}
-
-	public function value()
-	{
-		return $this->value;
 	}
 
 	public function __toString()

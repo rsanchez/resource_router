@@ -127,7 +127,7 @@ Your callback should set a valid `template_group/template` string using the `$ro
 Or you can avoid setting a template to signify that this url does *not* match the route:
 
 	'blog/:any' => function($router, $wildcard) {
-		if ($wildcard->value() === 'foo') {
+		if ($wildcard->value === 'foo') {
 			return;
 		}
 		$router->setTemplate('blog/single');
