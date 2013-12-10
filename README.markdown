@@ -27,31 +27,31 @@ On the left are the URIs you wish to match, and on the right are `template_group
 
 #### :any
 
-Matches any non-backslash character(s).
+Matches any non-backslash character(s). The equivalent regular expression is `([^/]+)`;
 
 #### :num
 
-Matches a numeric value.
+Matches a numeric value. The equivalent regular expression is `(\d+)`;
 
 #### :year
 
-Matches 4 digits in a row.
+Matches 4 digits in a row. The equivalent regular expression is `(\d{4})`;
 
 #### :month
 
-Matches 2 digits in a row.
+Matches 2 digits in a row. The equivalent regular expression is `(\d{2})`;
 
 #### :day
 
-Matches 2 digits in a row.
+Matches 2 digits in a row. The equivalent regular expression is `(\d{2})`;
 
 #### :pagination
 
-Matches a P:num segment.
+Matches a P:num segment. The equivalent regular expression is `(/P\d+)?`;
 
 #### :category
 
-Matches `<your_reserved_category_word>/<category_id_or_url_title>`.
+Matches `<Category URL Indicator>/<category_id or category_url_title>`. The Category URL Indicator is set in Admin > Channel Administration > Global Preferences. The second segment value depends on the "Use Category URL Titles In Links?" setting.
 
 #### :page:XX
 
@@ -63,31 +63,31 @@ Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_
 
 #### :all
 
-Matches all possible segments.
+Matches all possible segments. The equivalent regular expression is `(/.*)?`;
 
 #### :entry_id
 
-Matches an entry id. Does not match if the entry id is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+Matches an entry id. Does not match if the entry id is not found in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidEntryId()`](#wildcard-isvalidentryidwhere--array).
 
 #### :url_title
 
-Matches a url title. Does not match if the url title is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+Matches a url title. Does not match if the url title is not found in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidUrlTitle()`](#wildcard-isvalidurltitlewhere--array).
 
 #### :category_id
 
-Matches a category id. Does not match if the category id is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+Matches a category id. Does not match if the category id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidCategoryId()`](#wildcard-isvalidcategoryidwhere--array).
 
 #### :category_url_title
 
-Matches a category url title. Does not match if the category url title is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+Matches a category url title. Does not match if the category url title is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidCategoryUrlTitle()`](#wildcard-isvalidcategoryurltitlewhere--array).
 
 #### :member_id
 
-Matches a member id. Does not match if the member id is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+Matches a member id. Does not match if the member id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidMemberId()`](#wildcard-isvalidmemberidwhere--array).
 
 #### :username
 
-Matches a username. Does not match if the username is not found in the database. *Note:* If you use a callback with this wildcard, there will be no automatic validation. You must validate yourself in the callback using `$wildcard->isValid()`.
+Matches a username. Does not match if the username is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidUsername()`](#wildcard-isvalidusernamewhere--array).
 
 ### Matches
 
@@ -141,7 +141,7 @@ Return a string to immediately output that string and avoid the template engine:
 
 #### $router
 
-The first argument in the callback is the router object. It has a few methods you can use.
+The first argument in the callback is a `\Template_routes\Router` object. It has a few methods you can use.
 
 ##### $router->setTemplate(string $template)
 
@@ -170,7 +170,7 @@ Set a global variable to use in your template.
 
 ##### $router->setVariable(string $key, mixed $value)
 
-Set tag pair arrays to use as variables in your template.
+Set tag pair arrays to use as variables in your template. These variables are accessible using the `{exp:template_routes:your_var_name}` template tags.
 
 	'blog/:any' => function($router) {
 		// {exp:template_routes:foo} -> bar
@@ -223,7 +223,7 @@ Set the HTTP response status code.
 
 ##### $router->json(mixed $data)
 
-Send a JSON response of the data wwith Content-Type: application/json headers
+Send a JSON response of the data wwith `Content-Type: application/json` headers
 
 	'blog/:any' => function($router) {
 		$router->json(array('foo' => 'bar'));
@@ -231,7 +231,7 @@ Send a JSON response of the data wwith Content-Type: application/json headers
 
 #### $wildcard
 
-The second and subsequent callback arguments are `Wildcard` objects.
+The second and subsequent callback arguments are `\Template_routes\Wildcard` objects.
 
 ##### $wildcard->value
 
@@ -256,6 +256,24 @@ Check if the specified entry_id exists.
 		}
 	}
 
+In the second parameter, you can specify other columns/values to use in the query WHERE statement.
+
+	'blog/:num' => function($router, $wildcard) {
+		$where = array(
+			'status' => 'open',
+			'channel' => 'blog',
+		);
+	
+		if ($wildcard->isValidEntryId($where))
+		{
+			$router->setTemplate('site/_blog_detail');
+		}
+		else
+		{
+			$router->set404();
+		}
+	}
+
 ##### $wildcard->isValidUrlTitle($where = array())
 
 Check if the specified url_title exists.
@@ -271,23 +289,12 @@ Check if the specified url_title exists.
 		}
 	}
 
-	'blog/:any' => function($router, $wildcard) {
-		if ($wildcard->isValidUrlTitle(array('status' => 'open')))
-		{
-			$router->setTemplate('site/_blog_detail');
-		}
-		else
-		{
-			$router->set404();
-		}
-	}
-
 ##### $router->isValidEntry(array $where)
 
 Check if the specified entry exists.
 
 	'blog/:any' => function($router, $wildcard) {
-		if ($router->isValidEntry(array('url_title' => $wildcard->value, 'status' => 'open')))
+		if ($router->isValidEntry(array('url_title' => $wildcard, 'status' => 'open')))
 		{
 			$router->setTemplate('site/_blog_detail');
 		}
@@ -384,12 +391,12 @@ Check if the specified member exists.
 
 	'users/:any' => function($router, $wildcard) {
 		// use the second parameter to specify a column to retrieve data from
-		$valid = $router->isValidMember(array(
-			'username' => $wildcard->value,
+		$where = array(
+			'username' => $wildcard,
 			'group_id' => 5,
-		));
+		);
 
-		if ($valid)
+		if ($router->isValidMember($where))
 		{
 			$router->setTemplate('site/_user_detail');
 		}
@@ -414,24 +421,21 @@ Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure
 Use callbacks for highly custom URLs:
 
 	$config['template_routes'] = array(
-		'blog/:any' => function($router) {
-			$segment = $router->wildcard(1);
-
-			// is it a url title?
-			if ($router->isValidUrlTitle($segment))
-			{
-				$router->setTemplate('site/_blog_detail');
-			}
+		'blog/:any' => function($router, $wildcard) {
 			// is it a category url title?
-			else if (FALSE !== ($cat_id = $router->isValidCategoryUrlTitle($segment)))
+			if ($wildcard->isValidCategoryUrlTitle())
 			{
-				$router->setGlobal('route_1_cat_id', $cat_id);
 				$router->setTemplate('site/_blog_category');
 			}
 			// is it a username?
-			else if (FALSE !== ($member_id = $router->isValidUsername($segment)))
+			else if ($wildcard->isValidUsername())
 			{
 				$router->setTemplate('site/_blog_author');
+			}
+			// is it a url title?
+			else if ($wildcard->isValidUrlTitle())
+			{
+				$router->setTemplate('site/_blog_detail');
 			}
 			else
 			{
