@@ -223,10 +223,18 @@ Set the HTTP response status code.
 
 ##### $router->json(mixed $data)
 
-Send a JSON response of the data wwith `Content-Type: application/json` headers
+Send a JSON response of the data wwith `Content-Type: application/json` headers.
 
 	'blog/:any' => function($router) {
 		$router->json(array('foo' => 'bar'));
+	}
+
+##### $router->redirect(string $url, int $statusCode = 301)
+
+Redirect to the specified URL or `template_group/template_name`.
+
+	'blog/:any' => function($router) {
+		$router->redirect('foo/bar');
 	}
 
 #### $wildcard

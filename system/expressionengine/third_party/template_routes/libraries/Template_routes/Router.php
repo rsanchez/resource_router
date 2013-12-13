@@ -267,6 +267,26 @@ class Router {
 		return $this->isPage;
 	}
 
+	public function redirect($url, $statusCode = 301)
+	{
+		// if it doesn't start with:
+		// a) a slash
+		// b) a dot
+		// c) a valid protocol (eg. http://)
+		// 
+		// assume it's a EE template url
+		if ( ! preg_match('#^(/|\.|[a-z]+://)#', $url))
+		{
+			$url = ee()->functions->create_url($url);
+		}
+
+		$this->setHeader('Location: '.$url);
+
+		$this->setHttpStatus($statusCode);
+
+		$this->output();
+	}
+
 	/**
 	 * Send this data as a JSON response
 	 *
@@ -310,7 +330,7 @@ class Router {
 	 * 
 	 * @param string $output
 	 */
-	public function output($output)
+	public function output($output = '')
 	{
 		ee()->output->final_output = $output;
 
