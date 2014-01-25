@@ -84,8 +84,6 @@ class Wildcard {
 	{
 		$joined = FALSE;	
 
-		ee()->db->select('categories.*');
-
 		if (isset($where['channel']) || isset($where['channel_id']))
 		{
 			if (isset($where['channel']))
@@ -146,6 +144,8 @@ class Wildcard {
 			}
 		}
 
+		ee()->db->select('categories.*');
+
 		$query = ee()->db->get('categories');
 
 		$return = $query->num_rows() > 0;
@@ -160,7 +160,19 @@ class Wildcard {
 		}
 		else
 		{
-			foreach (ee()->db->list_fields('categories') as $key)
+			$fields = array(
+				'cat_id',
+				'site_id',
+				'group_id',
+				'parent_id',
+				'cat_name',
+				'cat_url_title',
+				'cat_description',
+				'cat_image',
+				'cat_order',
+			);
+
+			foreach ($fields as $key)
 			{
 				$this->router->setGlobal(sprintf('route_%d_%s', $this->index, $key), '');
 			}
