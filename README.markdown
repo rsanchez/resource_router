@@ -65,29 +65,33 @@ Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_
 
 Matches all possible segments. The equivalent regular expression is `(/.*)?`;
 
+### Validating Wildcards
+
+These wildcards will perform a database operation to ensure that the wildcard value exists in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks)). If you provide a callback, as opposed to a `template_group/template_name` string, the wildcard will *not* be validated. You must validate it yourself in your callback.
+
 #### :entry_id
 
-Matches an entry id. Does not match if the entry id is not found in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidEntryId()`](#wildcard-isvalidentryidwhere--array).
+Matches an entry id. Does not match if the entry id is not found in the database. To validate on additional columns, you should use a [Callback](#callbacks) and [`$wildcard->isValidEntryId()`](#wildcard-isvalidentryidwhere--array).
 
 #### :url_title
 
-Matches a url title. Does not match if the url title is not found in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidUrlTitle()`](#wildcard-isvalidurltitlewhere--array).
+Matches a url title. Does not match if the url title is not found in the database. To validate on additional columns, you should use a [Callback](#callbacks) and [`$wildcard->isValidUrlTitle()`](#wildcard-isvalidurltitlewhere--array).
 
 #### :category_id
 
-Matches a category id. Does not match if the category id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidCategoryId()`](#wildcard-isvalidcategoryidwhere--array).
+Matches a category id. Does not match if the category id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidCategoryId()`](#wildcard-isvalidcategoryidwhere--array).
 
 #### :category_url_title
 
-Matches a category url title. Does not match if the category url title is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidCategoryUrlTitle()`](#wildcard-isvalidcategoryurltitlewhere--array).
+Matches a category url title. Does not match if the category url title is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidCategoryUrlTitle()`](#wildcard-isvalidcategoryurltitlewhere--array).
 
 #### :member_id
 
-Matches a member id. Does not match if the member id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidMemberId()`](#wildcard-isvalidmemberidwhere--array).
+Matches a member id. Does not match if the member id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidMemberId()`](#wildcard-isvalidmemberidwhere--array).
 
 #### :username
 
-Matches a username. Does not match if the username is not found in the database. To validate on additional columns (ex. `group_id` or `channel`) you should use [Callbacks](#callbacks) and [`$wildcard->isValidUsername()`](#wildcard-isvalidusernamewhere--array).
+Matches a username. Does not match if the username is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidUsername()`](#wildcard-isvalidusernamewhere--array).
 
 ### Matches
 
