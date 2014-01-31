@@ -50,10 +50,10 @@ class Wildcard {
 				$where['url_title'] = $this->value;
 				return $this->isValidEntry($where);
 			case 'category_id':
-				$where['category_id'] = $this->value;
+				$where['cat_id'] = $this->value;
 				return $this->isValidCategory($where);
 			case 'category_url_title':
-				$where['category_url_title'] = $this->value;
+				$where['cat_url_title'] = $this->value;
 				return $this->isValidCategory($where);
 			case 'member_id':
 				$where['member_id'] = $this->value;

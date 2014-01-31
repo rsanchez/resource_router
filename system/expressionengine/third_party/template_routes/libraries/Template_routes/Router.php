@@ -128,7 +128,6 @@ class Router {
 						':year',
 						':month',
 						':day',
-						':category',
 						'/:pagination',
 						':pagination',
 						'/:all',
@@ -138,6 +137,7 @@ class Router {
 						':category_url_title',
 						':member_id',
 						':username',
+						':category',
 					),
 					array(
 						'([^/]+)',
@@ -145,7 +145,6 @@ class Router {
 						'(\d{4})',
 						'(\d{2})',
 						'(\d{2})',
-						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
 						'(/P\d+)?',
 						'(/P\d+)?',
 						'(/.*)?',
@@ -155,6 +154,7 @@ class Router {
 						'([^/]+)',
 						'(\d+)',
 						'([^/]+)',
+						preg_quote(ee()->config->item('reserved_category_word')).'/'.(ee()->config->item('use_category_name') === 'y' ? '([^/]+)' : '(\d+)'),
 					),
 					$rule
 				);
