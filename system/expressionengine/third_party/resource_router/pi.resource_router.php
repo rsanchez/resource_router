@@ -1,10 +1,10 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Template_routes
+class Resource_router
 {
 	public function __call($name, $args)
 	{
-		$data = ee()->session->cache('template_routes', $name);
+		$data = ee()->session->cache('resource_router', $name);
 
 		if ( ! $data)
 		{

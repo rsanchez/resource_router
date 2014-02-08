@@ -1,8 +1,8 @@
 <?php
 
-namespace Template_routes;
+namespace rsanchez\ResourceRouter;
 
-use \Template_routes\Router;
+use rsanchez\ResourceRouter\Router;
 
 class Wildcard {
 	/**

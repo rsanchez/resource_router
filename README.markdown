@@ -1,12 +1,12 @@
-# Template Routes
+# Resource Router
 
-Control your URLs by remapping URI routes to a specific template, using [CodeIgniter-style](http://ellislab.com/codeigniter/user-guide/general/routing.html) routing rules.
+Control your URLs by remapping URI routes to a specific HTTP response, using [CodeIgniter-style](http://ellislab.com/codeigniter/user-guide/general/routing.html) routing rules.
 
 ## Installation
 
 *NOTE:* ExpressionEngine 2.6+ and PHP 5.3+ are required
 
-* Copy the /system/expressionengine/third_party/template_routes/ folder to your /system/expressionengine/third_party/ folder
+* Copy the /system/expressionengine/third_party/resource_router/ folder to your /system/expressionengine/third_party/ folder
 * Install the extension
 
 ## Usage
@@ -15,7 +15,7 @@ Control your URLs by remapping URI routes to a specific template, using [CodeIgn
 
 Your routing rules must be set in your system/expressionengine/config/config.php file.
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		'blog/:category' => 'site/blog-category',
 		'blog/:year/:pagination' => 'site/blog-yearly-archive',
 		'blog/:any' => 'site/blog-single',
@@ -57,7 +57,7 @@ Matches `<Category URL Indicator>/<category_id or category_url_title>`. The Cate
 
 Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_id
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		':page:123/:pagination' => 'site/page',
 	);
 
@@ -102,7 +102,7 @@ All wildcards and any parenthesized regular expression patterns will be availabl
 
 These matches are also available in your template definition, using `$1`, `$2` and so forth:
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		'blog/:any/:any' => 'site/$1_$2',
 	);
 
@@ -110,7 +110,7 @@ These matches are also available in your template definition, using `$1`, `$2` a
 
 Like standard CodeIgniter routing, you may also use regular expressions in your routing rules:
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		'blog/([A-Z])/:any' => 'blog/alphabetized',
 	);
 
@@ -120,13 +120,13 @@ Don't forget to wrap in parentheses if you would like your regular expression to
 
 You can use callbacks in your routes:
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		'blog/:any/:any' => function($router, $wildcard_1, $wildcard_2) {
 			$router->setTemplate('blog/single');
-		} 
+		}
 	);
 
-Your callback should set a valid `template_group/template` string using the `$router->setTemplate()` method.
+If you wish to output an EE template at the specified url pattern, your callback should set a valid `template_group/template` string using the `$router->setTemplate()` method.
 
 Or you can avoid setting a template to signify that this url does *not* match the route:
 
@@ -145,7 +145,7 @@ Return a string to immediately output that string and avoid the template engine:
 
 #### $router
 
-The first argument in the callback is a `\Template_routes\Router` object. It has a few methods you can use.
+The first argument in the callback is a `rsanchez\ResourceRouter\Router` object. It has a few methods you can use.
 
 ##### $router->setTemplate(string $template)
 
@@ -174,16 +174,16 @@ Set a global variable to use in your template.
 
 ##### $router->setVariable(string $key, mixed $value)
 
-Set tag pair arrays to use as variables in your template. These variables are accessible using the `{exp:template_routes:your_var_name}` template tags.
+Set tag pair arrays to use as variables in your template. These variables are accessible using the `{exp:resource_router:your_var_name}` template tags.
 
 	'blog/:any' => function($router) {
-		// {exp:template_routes:foo} -> bar
+		// {exp:resource_router:foo} -> bar
 		$router->setVariable('foo', 'bar');
 
-		// {exp:template_routes:foo}{bar}-{baz}{/exp:template_routes:foo} -> abc-def
+		// {exp:resource_router:foo}{bar}-{baz}{/exp:resource_router:foo} -> abc-def
 		$router->setVariable('foo', array('bar' => 'abc', 'baz' => 'def'));
 
-		// {exp:template_routes:foo}{bar}-{baz},{/exp:template_routes:foo} -> abc-def,ghi-jkl,
+		// {exp:resource_router:foo}{bar}-{baz},{/exp:resource_router:foo} -> abc-def,ghi-jkl,
 		$router->setVariable('foo', array(
 			array('bar' => 'abc', 'baz' => 'def'),
 			array('bar' => 'ghi', 'baz' => 'jkl'),
@@ -243,7 +243,7 @@ Redirect to the specified URL or `template_group/template_name`.
 
 #### $wildcard
 
-The second and subsequent callback arguments are `\Template_routes\Wildcard` objects.
+The second and subsequent callback arguments are `rsanchez\ResourceRouter\Wildcard` objects.
 
 ##### $wildcard->value
 
@@ -422,7 +422,7 @@ Check if the specified member exists.
 
 Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure page:
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		':page:123/:pagination' => 'site/_blog-index',
 		':page:123/:category' => 'site/_blog-category',
 		':page:123/:year' => 'site/_blog-yearly',
@@ -432,7 +432,7 @@ Add pagination, category, and yearly/monthly/daily archives to a Pages/Structure
 
 Use callbacks for highly custom URLs:
 
-	$config['template_routes'] = array(
+	$config['resource_router'] = array(
 		'blog/:any' => function($router, $wildcard) {
 			// is it a category url title?
 			if ($wildcard->isValidCategoryUrlTitle())

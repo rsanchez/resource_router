@@ -1,8 +1,8 @@
 <?php
 
-namespace Template_routes;
+namespace rsanchez\ResourceRouter;
 
-use \Template_routes\Wildcard;
+use rsanchez\ResourceRouter\Wildcard;
 
 class Router {
 
@@ -54,7 +54,7 @@ class Router {
 	public function __construct($uri_string)
 	{
 		// get the routes array from the config file
-		$routes = ee()->config->item('template_routes');
+		$routes = ee()->config->item('resource_router');
 
 		if (is_array($routes))
 		{
@@ -507,19 +507,19 @@ class Router {
 	}
 
 	/**
-	 * Set a template single or pair variable for use with the {exp:template_routes} plugin
+	 * Set a template single or pair variable for use with the {exp:resource_router} plugin
 	 *
 	 * $router->setVariable('foo', 'bar');
 	 *
-	 * {exp:template_routes:foo} -> bar
+	 * {exp:resource_router:foo} -> bar
 	 *
 	 * $router->setVariable('foo', array('bar' => 1, 'baz' => 2));
 	 *
-	 * {exp:template_routes:foo}{bar}-{baz}{/exp:template_routes:foo} -> 1-2
+	 * {exp:resource_router:foo}{bar}-{baz}{/exp:resource_router:foo} -> 1-2
 	 *
 	 * $router->setVariable('foo', array(array('bar' => 1, 'baz' => 2), array('bar' => 3, 'baz' => 4)));
 	 *
-	 * {exp:template_routes:foo}{bar}-{baz}|{/exp:template_routes:foo} -> 1-2|3-4
+	 * {exp:resource_router:foo}{bar}-{baz}|{/exp:resource_router:foo} -> 1-2|3-4
 	 * 
 	 * @param string $name the key or identifier of the variable
 	 * @param string|array $data an array for a tag pair or a single value
@@ -527,7 +527,7 @@ class Router {
 	 */
 	public function setVariable($name, $data)
 	{
-		ee()->session->set_cache('template_routes', $name, $data);
+		ee()->session->set_cache('resource_router', $name, $data);
 
 		return $this;
 	}
@@ -569,6 +569,6 @@ class Router {
 	 */
 	public function variable($which)
 	{
-		return ee()->session->cache('template_routes', $which);
+		return ee()->session->cache('resource_router', $which);
 	}
 }

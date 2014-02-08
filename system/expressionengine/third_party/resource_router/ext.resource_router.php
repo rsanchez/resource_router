@@ -11,11 +11,11 @@
  * @since		Version 2.0
  * @filesource
  */
- 
+
 // ------------------------------------------------------------------------
 
 /**
- * Template Routes Extension
+ * Resource Router Extension
  *
  * @package		ExpressionEngine
  * @subpackage	Addons
@@ -24,17 +24,15 @@
  * @link		https://github.com/rsanchez
  */
 
-class Template_routes_ext {
-	
+class Resource_router_ext {
+
 	public $settings 		= array();
-	public $description		= 'Routes to templates';
+	public $description		= 'Map URI patterns to resources';
 	public $docs_url		= '';
-	public $name			= 'Template Routes';
+	public $name			= 'Resource Router';
 	public $settings_exist	= 'n';
-	public $version			= '1.0.1';
-	
-	private $EE;
-	
+	public $version			= '0.9.9';
+
 	/**
 	 * Constructor
 	 *
@@ -46,7 +44,7 @@ class Template_routes_ext {
 	}
 
 	// ----------------------------------------------------------------------
-	
+
 	/**
 	 * Activate Extension
 	 *
@@ -61,7 +59,7 @@ class Template_routes_ext {
 	{
 		// Setup custom settings in this array.
 		$this->settings = array();
-		
+
 		$data = array(
 			'class'		=> __CLASS__,
 			'method'	=> 'core_template_route',
@@ -72,12 +70,12 @@ class Template_routes_ext {
 			'priority'  => 1,
 		);
 
-		ee()->db->insert('extensions', $data);			
-		
+		ee()->db->insert('extensions', $data);
+
 	}
 
 	// ----------------------------------------------------------------------
-	
+
 	/**
 	 * core_template_route
 	 *
@@ -87,16 +85,16 @@ class Template_routes_ext {
 	public function core_template_route($uri_string)
 	{
 		//since EE doesn't have an autoloader
-		require_once PATH_THIRD.'template_routes/libraries/Template_routes/Router.php';
-		require_once PATH_THIRD.'template_routes/libraries/Template_routes/Wildcard.php';
+		require_once PATH_THIRD.'resource_router/libraries/ResourceRouter/Router.php';
+		require_once PATH_THIRD.'resource_router/libraries/ResourceRouter/Wildcard.php';
 
-		$router = new \Template_routes\Router($uri_string);
+		$router = new \rsanchez\ResourceRouter\Router($uri_string);
 
 		if ($router->template() && ! $router->isPage())
 		{
 			// prevent other extensions from messing with us
 			ee()->extensions->end_script = TRUE;
-			
+
 			// set the route as array from the template string
 			return explode('/', $router->template());
 		}
@@ -136,10 +134,10 @@ class Template_routes_ext {
 		{
 			return FALSE;
 		}
-	}	
-	
+	}
+
 	// ----------------------------------------------------------------------
 }
 
-/* End of file ext.template_routes.php */
-/* Location: /system/expressionengine/third_party/template_routes/ext.template_routes.php */
+/* End of file ext.resource_router.php */
+/* Location: /system/expressionengine/third_party/resource_router/ext.resource_router.php */
