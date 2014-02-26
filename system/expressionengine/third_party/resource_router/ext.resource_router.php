@@ -31,7 +31,7 @@ class Resource_router_ext {
 	public $docs_url		= '';
 	public $name			= 'Resource Router';
 	public $settings_exist	= 'n';
-	public $version			= '0.9.9';
+	public $version			= '1.0.0';
 
 	/**
 	 * Constructor
