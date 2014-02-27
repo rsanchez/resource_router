@@ -47,7 +47,7 @@ This add-on was formerly known as Template Routes. If you are updating from Temp
 * Install Resource Router
 * Change your `$config['template_routes']` to `$config['resource_router']`
 
-## Usage
+## Basic Usage
 
 ### Setting up your routing rules
 
@@ -56,16 +56,9 @@ Your routing rules must be set in your system/expressionengine/config/config.php
     $config['resource_router'] = array(
         'blog/:category' => 'site/blog-category',
         'blog/:year/:pagination' => 'site/blog-yearly-archive',
-        'blog/:any' => function ($router, $wildcard) {
-            if ($wildcard->isValidUsername()) {
-                $router->setTemplate('site/blog-posts-by-author');
-            } else {
-                $router->setTemplate('site/blog-single');
-            }
-        },
     );
 
-On the left is the URI pattern you wish to match, and on the right is one of two things: a) a string representing a `template_group/template_name` pair, or b) a callback receiving Router and Wilcard objects where you can craft a response for the URL.
+On the left is the URI pattern you wish to match, and on the right is one of two things: a) a string representing a `template_group/template_name` pair, or b) a callback receiving Router and Wilcard objects where you can craft a response for the URL. The callback functionality is covered in the [Advanced Usage](#advanced-usage) section.
 
 ### Wildcards
 
@@ -159,6 +152,8 @@ Like standard CodeIgniter routing, you may also use regular expressions in your 
     );
 
 Don't forget to wrap in parentheses if you would like your regular expression to become a Wildcard and `{route_X}` variable.
+
+## Advanced Usage
 
 ### Callbacks
 
@@ -471,28 +466,28 @@ Suppose you wanted this scheme for blog urls:
 A member group dependent endpoint:
 
     $config['resource_router'] = array(
-    	'restricted-area' => function($router) {
-    	    if (ee()->session->userdata('group_id') != 1) {
-    	        $router->set404();
-    	    }
-    	    $router->setTemplate('site/.restricted-area');
-    	}
+        'restricted-area' => function($router) {
+            if (ee()->session->userdata('group_id') != 1) {
+                $router->set404();
+            }
+            $router->setTemplate('site/.restricted-area');
+        }
     );
 
 
 A custom JSON endpoint:
 
     $config['resource_router'] = array(
-    	'api/latest-news' => function($router) {
-    	    $query = ee()->db->select('title, url_title')
-    	        ->where('status', 'open')
-    	        ->where('channel_id', 1)
-    	        ->order_by('entry_date', 'ASC')
-    	        ->limit(10)
-    	        ->get('channel_titles');
-    	    
-    	    $result = $query->result();
-    	    
-    	    $router->json($result);
-    	}
+        'api/latest-news' => function($router) {
+            $query = ee()->db->select('title, url_title')
+                ->where('status', 'open')
+                ->where('channel_id', 1)
+                ->order_by('entry_date', 'ASC')
+                ->limit(10)
+                ->get('channel_titles');
+            
+            $result = $query->result();
+            
+            $router->json($result);
+        }
     );
