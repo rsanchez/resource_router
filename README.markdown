@@ -331,12 +331,12 @@ Check if the specified url_title exists.
         }
     }
 
-##### $router->isValidEntry(array $where)
+##### $wildcard->isValidEntry($where = array())
 
 Check if the specified entry exists.
 
     'blog/:any' => function($router, $wildcard) {
-        if ($router->isValidEntry(array('url_title' => $wildcard, 'status' => 'open'))) {
+        if ($wildcard->isValidEntry(array('url_title' => $wildcard, 'status' => 'open'))) {
             $router->setTemplate('site/_blog_detail');
         } else {
             $router->set404();
@@ -420,7 +420,7 @@ Check if the specified member exists.
             'group_id' => 5,
         );
 
-        if ($router->isValidMember($where)) {
+        if ($wildcard->isValidMember($where)) {
             $router->setTemplate('site/_user_detail');
         } else {
             $router->set404();
