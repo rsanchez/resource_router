@@ -403,7 +403,7 @@ class Router {
 		
 		ee()->config->set_item('hidden_template_404', 'y');
 
-		$this->template = '/'.$hidden_indicator;
+		$this->template = $hidden_indicator.'/'.$hidden_indicator;
 	}
 
 	/**
