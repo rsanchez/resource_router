@@ -196,7 +196,7 @@ Set the `template_group/template_name` to use for this URI
 
 ##### $router->set404()
 
-Trigger your EE 404 template.
+Trigger your EE 404 template. You must set a 404 Page template in your EE Global Template Preferences.
 
     'blog/:any' => function($router) {
         $router->set404();
