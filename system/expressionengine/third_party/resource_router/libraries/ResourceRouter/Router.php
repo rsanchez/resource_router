@@ -183,7 +183,7 @@ class Router {
 					//validate all the wildcards and bail if it fails
 					if ( ! is_callable($template) && ! $this->wildcards[$index]->isValid())
 					{
-						$this->template = null;
+						$template = null;
 
 						continue;
 					}
