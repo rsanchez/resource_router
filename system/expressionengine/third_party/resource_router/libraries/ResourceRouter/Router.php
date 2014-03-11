@@ -295,11 +295,31 @@ class Router {
 	 * @param  mixed $data
 	 * @return void
 	 */
-	public function json($data)
+	public function json($data, $options = 0)
 	{
 		$this->setOutputType('json');
 
-		return $this->output(json_encode($data));
+		if (is_object($data) && ! $data instanceof \JsonSerializable)
+		{
+			if (method_exists($data, 'toJson'))
+			{
+				$output = $data->toJson($options);
+			}
+			elseif (method_exists($data, 'toArray'))
+			{
+				$output = json_encode($data->toArray(), $options);
+			}
+			else
+			{
+				$output = json_encode($data, $options);
+			}
+		}
+		else
+		{
+			$output = json_encode($data, $options);
+		}
+
+		return $this->output($output);
 	}
 
 	/**
