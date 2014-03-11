@@ -1,4 +1,35 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * ExpressionEngine - by EllisLab
+ *
+ * @package   ExpressionEngine
+ * @author    ExpressionEngine Dev Team
+ * @copyright Copyright (c) 2003 - 2014, EllisLab, Inc.
+ * @license   http://expressionengine.com/user_guide/license.html
+ * @link    http://expressionengine.com
+ * @since   Version 2.0
+ * @filesource
+ */
+
+/**
+ * Resource Router Plugin
+ *
+ * @package   ExpressionEngine
+ * @subpackage  Addons
+ * @category  Plugin
+ * @author    Rob Sanchez
+ * @link    https://github.com/rsanchez
+ */
+
+$plugin_info = array(
+	'pi_name'   => 'resource_router',
+	'pi_version'  => '1.0.1',
+	'pi_author'   => 'Rob Sanchez',
+	'pi_author_url' => 'https://github.com/rsanchez',
+	'pi_description'=> 'Tags for Resource Router variables',
+	'pi_usage'    => '{exp:resource_router:foo}{bar}-{baz}{/exp:resource_router:foo}'
+);
 
 class Resource_router
 {
@@ -36,3 +67,6 @@ class Resource_router
 		return $data;
 	}
 }
+
+/* End of file pi.resource_router.php */
+/* Location: /system/expressionengine/third_party/resource_router/pi.resource_router.php */
