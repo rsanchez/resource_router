@@ -56,6 +56,9 @@ class Router {
 		// get the routes array from the config file
 		$routes = ee()->config->item('resource_router');
 
+		// in case anyone tries to serialize ee()->config
+		unset(ee()->config->config['resource_router'], ee()->config->default_ini['resource_router']);
+
 		if (is_array($routes))
 		{
 			$this->routes = $routes;
