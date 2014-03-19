@@ -460,6 +460,7 @@ Suppose you wanted this scheme for blog urls:
 * `/blog/<your-individual-post>`
 * `/blog/<your-author-name>`
 
+
     $config['resource_router'] = array(
         'blog/:any' => function($router, $wildcard) {
             // is it a category url title?
