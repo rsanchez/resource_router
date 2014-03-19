@@ -460,23 +460,24 @@ Suppose you wanted this scheme for blog urls:
 * `/blog/<your-individual-post>`
 * `/blog/<your-author-name>`
 
-
-    $config['resource_router'] = array(
-        'blog/:any' => function($router, $wildcard) {
-            // is it a category url title?
-            if ($wildcard->isValidCategoryUrlTitle()) {
-                $router->setTemplate('site/_blog_category');
-            // is it a username?
-            } elseif ($wildcard->isValidUsername()) {
-                $router->setTemplate('site/_blog_author');
-            // is it a url title?
-            } elseif ($wildcard->isValidUrlTitle()) {
-                $router->setTemplate('site/_blog_detail');
-            } else {
-                $router->set404();
-            }
+```
+$config['resource_router'] = array(
+    'blog/:any' => function($router, $wildcard) {
+        // is it a category url title?
+        if ($wildcard->isValidCategoryUrlTitle()) {
+            $router->setTemplate('site/_blog_category');
+        // is it a username?
+        } elseif ($wildcard->isValidUsername()) {
+            $router->setTemplate('site/_blog_author');
+        // is it a url title?
+        } elseif ($wildcard->isValidUrlTitle()) {
+            $router->setTemplate('site/_blog_detail');
+        } else {
+            $router->set404();
         }
-    );
+    }
+);
+````
 
 A member group dependent endpoint:
 
