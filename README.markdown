@@ -264,6 +264,20 @@ Set the HTTP response status code.
         $router->setHttpStatus(401);
     }
 
+##### $router->view(string $view, array $variables)
+
+Render a CodeIgniter view file
+
+    'blog/:any' => function($router) {
+        $router->view('myview', array('foo' => 'bar'));
+    }
+
+By default, view files are read from `system/expressionengine/third_party/resource_router/views/`. If you wish to change this, you can do so in your config file:
+
+    $config['resource_router:package_path'] = '/path/to/directory/';
+
+Your defined package path must have a `views` folder within it. You should not add `views/` to your defined package path. In other words, if your views are in `/var/www/assets/views/`, your package path should be set to `/var/www/assets/`.
+
 ##### $router->json(mixed $data)
 
 Send a JSON response of the data wwith `Content-Type: application/json` headers.

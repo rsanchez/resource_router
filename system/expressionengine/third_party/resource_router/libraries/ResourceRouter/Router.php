@@ -53,6 +53,11 @@ class Router {
 	 */
 	public function __construct($uri_string)
 	{
+		if ($package_path = ee()->config->item('resource_router:package_path'))
+		{
+			ee()->load->add_package_path($package_path);
+		}
+
 		// get the routes array from the config file
 		$routes = ee()->config->item('resource_router');
 
@@ -288,6 +293,17 @@ class Router {
 		$this->setHttpStatus($statusCode);
 
 		$this->output();
+	}
+
+	/**
+	 * Load a CI view
+	 * @param  string $view name of the view file (sans file extension)
+	 * @param  array  $variables
+	 * @return string
+	 */
+	public function view($view, $variables = array())
+	{
+		return ee()->load->view($view, $variables, TRUE);
 	}
 
 	/**
