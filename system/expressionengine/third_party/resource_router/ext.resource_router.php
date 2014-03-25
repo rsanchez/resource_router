@@ -90,13 +90,13 @@ class Resource_router_ext {
 
 		$router = new \rsanchez\ResourceRouter\Router($uri_string);
 
-		if ($router->template() && ! $router->isPage())
+		if ($router->isRoutable())
 		{
 			// prevent other extensions from messing with us
 			ee()->extensions->end_script = TRUE;
 
 			// set the route as array from the template string
-			return explode('/', $router->template());
+			return $router->template();
 		}
 
 		// set the default route to any other extension calling this hook

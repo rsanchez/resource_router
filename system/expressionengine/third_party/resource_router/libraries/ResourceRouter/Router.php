@@ -34,10 +34,16 @@ class Router {
 	protected $isPage = FALSE;
 
 	/**
-	 * The template to load
+	 * The template group
 	 * @var null|string
 	 */
-	protected $template;
+	protected $templateGroup;
+
+	/**
+	 * The template name
+	 * @var null|string
+	 */
+	protected $templateName;
 
 	/**
 	 * List of matched wildcards
@@ -216,7 +222,7 @@ class Router {
 					}
 				}
 
-				if ($this->template)
+				if ($this->hasTemplate())
 				{
 					// check if it has wildcards
 					if ($wildcard !== FALSE)
@@ -233,7 +239,7 @@ class Router {
 			}
 		}
 
-		if ($this->template)
+		if ($this->hasTemplate())
 		{
 			if ($query_string)
 			{
@@ -260,7 +266,8 @@ class Router {
 				$this->setGlobal('route_'.$i, (string) $wildcard);
 
 				// replace any sub-string matches in the template definition
-				$this->template = str_replace('$'.$i, $wildcard, $this->template);
+				$this->templateName = str_replace('$'.$i, $wildcard, $this->templateName);
+				$this->templateGroup = str_replace('$'.$i, $wildcard, $this->templateGroup);
 			}
 		}
 	}
@@ -436,13 +443,14 @@ class Router {
 	public function set404()
 	{
 		//all the conditions to trigger a 404 in the TMPL class
-		$hidden_indicator = ee()->config->item('hidden_template_indicator') === FALSE ? '.' : ee()->config->item('hidden_template_indicator');
+		$hidden_template_indicator = ee()->config->item('hidden_template_indicator') ?: '.';
 		
 		ee()->uri->page_query_string = '';
 		
 		ee()->config->set_item('hidden_template_404', 'y');
 
-		$this->template = $hidden_indicator.'/'.$hidden_indicator;
+		$this->templateGroup = $hidden_template_indicator;
+		$this->templateName = $hidden_template_indicator;
 	}
 
 	/**
@@ -540,7 +548,21 @@ class Router {
 	 */
 	public function setTemplate($template)
 	{
-		$this->template = $template;
+		if ( ! is_array($template))
+		{
+			$template = explode('/', trim($template, '/'));
+		}
+
+		$this->templateGroup = $template[0];
+		$this->templateName = isset($template[1]) ? $template[1] : 'index';
+
+		$hidden_template_indicator = ee()->config->item('hidden_template_indicator') ?: '.';
+
+		//allow you to set hidden templates
+		if (isset($this->templateName[0]) && $this->templateName[0] === $hidden_template_indicator)
+		{
+			ee()->config->set_item('hidden_template_indicator', '%');
+		}
 
 		return $this;
 	}
@@ -597,7 +619,17 @@ class Router {
 	 */
 	public function template()
 	{
-		return $this->template;
+		return array($this->templateGroup, $this->templateName);
+	}
+
+	public function hasTemplate()
+	{
+		return $this->templateName && $this->templateGroup;
+	}
+
+	public function isRoutable()
+	{
+		return $this->hasTemplate() && ! $this->isPage;
 	}
 
 	/**
