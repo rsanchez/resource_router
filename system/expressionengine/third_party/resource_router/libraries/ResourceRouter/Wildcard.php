@@ -220,6 +220,8 @@ class Wildcard {
 
 					$joined_channel = TRUE;
 				}
+
+				$key = 'channels.channel_name';
 			}
 
 			if ($key === 'channel_id')
