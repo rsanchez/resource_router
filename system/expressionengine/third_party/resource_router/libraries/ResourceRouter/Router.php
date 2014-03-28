@@ -510,6 +510,7 @@ class Router {
 	 */
 	public function setHttpStatus($code)
 	{
+		// if you don't do this, EE_Output will override with a 200 status
 		ee()->config->set_item('send_headers', FALSE);
 
 		ee()->output->set_status_header($code);
@@ -616,11 +617,20 @@ class Router {
 		return array($this->templateGroup, $this->templateName);
 	}
 
+	/**
+	 * Check if a template has been set
+	 * @return bool
+	 */
 	public function hasTemplate()
 	{
 		return $this->templateName && $this->templateGroup;
 	}
 
+	/**
+	 * Check if the current uri is routable
+	 *
+	 * @return bool is there a valid template set, and does it not match a page uri exactly
+	 */
 	public function isRoutable()
 	{
 		return $this->hasTemplate() && ! $this->isPage;
