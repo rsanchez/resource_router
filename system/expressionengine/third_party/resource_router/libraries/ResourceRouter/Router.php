@@ -206,6 +206,16 @@ class Router {
 				{
 					$args = $this->wildcards;
 
+					$numWildcards = count($wildcardsByType);
+					$numArgs = count($args);
+
+					//pad the args with nulls
+					//:any and :pagination might be empty and therefor have no Wildcard objects
+					if ($numArgs < $numWildcards)
+					{
+						$args = array_merge($args, array_fill(0, $numWildcards - $numArgs, null));
+					}
+
 					array_unshift($args, $this);
 
 					$output = call_user_func_array($template, $args);
