@@ -302,8 +302,8 @@ The second and subsequent callback arguments are `rsanchez\ResourceRouter\Wildca
 
 Get the value of the wildcard match.
 
-  'blog/:any/:any' => function($router, $wildcard_1, $wildcard_2) {
-      $last_segment = $wildcard_2->value;
+    'blog/:any/:any' => function($router, $wildcard_1, $wildcard_2) {
+        $last_segment = $wildcard_2->value;
     }
 
 ##### $wildcard->isValidEntryId($where = array())
