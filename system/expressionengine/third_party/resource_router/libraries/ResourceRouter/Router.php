@@ -22,12 +22,6 @@ class Router {
 	protected $pageUris = array();
 
 	/**
-	 * HTTP Status code
-	 * @var integer
-	 */
-	protected $httpStatus = 200;
-
-	/**
 	 * Is the matched URI a page URI?
 	 * @var boolean
 	 */
@@ -382,8 +376,6 @@ class Router {
 
 		$output_type = ee()->output->out_type;
 
-		ee()->output->set_status_header($this->httpStatus);
-
 		$override_types = array('webpage', 'css', 'js', 'xml', 'json');
 
 		// dont send those weird pragma no-cache headers
@@ -518,7 +510,9 @@ class Router {
 	 */
 	public function setHttpStatus($code)
 	{
-		$this->httpStatus = $code;
+		ee()->config->set_item('send_headers', FALSE);
+
+		ee()->output->set_status_header($code);
 
 		return $this;
 	}
