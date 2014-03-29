@@ -84,7 +84,7 @@ Matches 2 digits in a row. The equivalent regular expression is `(\d{2})`;
 
 #### :pagination
 
-Matches a P:num segment. The equivalent regular expression is `(/P\d+)?`;
+Matches a P:num segment. The equivalent regular expression is `((?:/P\d+)?)`. This is an *optional* segment. If not present in the URI, the URI will still be considered a match. If so, the Wildcard object will have a `null` value.
 
 #### :category
 
@@ -100,7 +100,7 @@ Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_
 
 #### :all
 
-Matches all possible segments. The equivalent regular expression is `(/.*)?`;
+Matches all possible segments. The equivalent regular expression is `((?:/.*)?)`. This is an *optional* segment. If not present in the URI, the URI will still be considered a match. If so, the Wildcard object will have a `null` value.
 
 ### Validating Wildcards
 

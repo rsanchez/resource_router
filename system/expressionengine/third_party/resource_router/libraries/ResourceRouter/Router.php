@@ -153,9 +153,9 @@ class Router {
 						'(\d{4})',
 						'(\d{2})',
 						'(\d{2})',
-						'(/P\d+)?',
-						'(/P\d+)?',
-						'(/.*)?',
+						'((?:/P\d+)?)',
+						'((?:/P\d+)?)',
+						'((?:/.*)?)',
 						'(\d+)',
 						'([^/]+)',
 						'(\d+)',
@@ -185,7 +185,14 @@ class Router {
 
 					$type = isset($wildcardsByType[$index]) ? $wildcardsByType[$index] : NULL;
 
-					$this->wildcards[$index] = new Wildcard($this, $index, trim($segment, '/'), $type);
+					$segment = trim($segment, '/');
+
+					if ($segment === '')
+					{
+						$segment = NULL;
+					}
+
+					$this->wildcards[$index] = new Wildcard($this, $index, $segment, $type);
 					
 					//if it wasn't a callback (where it's assumed you ran your own validation),
 					//validate all the wildcards and bail if it fails
@@ -205,16 +212,6 @@ class Router {
 				if (is_callable($template))
 				{
 					$args = $this->wildcards;
-
-					$numWildcards = count($wildcardsByType);
-					$numArgs = count($args);
-
-					//pad the args with nulls
-					//:any and :pagination might be empty and therefor have no Wildcard objects
-					if ($numArgs < $numWildcards)
-					{
-						$args = array_merge($args, array_fill(0, $numWildcards - $numArgs, null));
-					}
 
 					array_unshift($args, $this);
 
