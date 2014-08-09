@@ -106,29 +106,31 @@ Matches all possible segments. The equivalent regular expression is `((?:/.*)?)`
 
 These wildcards will perform a database operation to ensure that the wildcard value exists in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks)). If you provide a callback, as opposed to a `template_group/template_name` string, the wildcard will *not* be validated. You must validate it yourself in your callback.
 
+Validating wildcards will have corresponding meta data attached to the wildcard object, and will set `{route_X_foo}` variables, where `foo` is a column from the database, such as cat_id. (Think Low Seg2cat).
+
 #### :entry_id
 
-Matches an entry id. Does not match if the entry id is not found in the database. To validate on additional columns, you should use a [Callback](#callbacks) and [`$wildcard->isValidEntryId()`](#wildcard-isvalidentryidwhere--array).
+Matches an entry id. Does not match if the entry id is not found in the database. To validate on additional columns, you should use a [Callback](#callbacks) and [`$wildcard->isValidEntryId()`](#wildcard-isvalidentryidwhere--array). Adds the following variables: `{route_X_entry_id}`, `{route_X_title}`, `{route_X_url_title}`, `{route_X_channel_id}`, where X is the specified URL segment.
 
 #### :url_title
 
-Matches a url title. Does not match if the url title is not found in the database. To validate on additional columns, you should use a [Callback](#callbacks) and [`$wildcard->isValidUrlTitle()`](#wildcard-isvalidurltitlewhere--array).
+Matches a url title. Does not match if the url title is not found in the database. To validate on additional columns, you should use a [Callback](#callbacks) and [`$wildcard->isValidUrlTitle()`](#wildcard-isvalidurltitlewhere--array). Adds the following variables: `{route_X_entry_id}`, `{route_X_title}`, `{route_X_url_title}`, `{route_X_channel_id}`, where X is the specified URL segment.
 
 #### :category_id
 
-Matches a category id. Does not match if the category id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidCategoryId()`](#wildcard-isvalidcategoryidwhere--array).
+Matches a category id. Does not match if the category id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidCategoryId()`](#wildcard-isvalidcategoryidwhere--array). Adds the following variables: `{route_X_cat_id}`, `{route_X_site_id}`, `{route_X_group_id}`, `{route_X_parent_id}`, `{route_X_cat_name}`, `{route_X_cat_url_title}`, `{route_X_cat_description}`, `{route_X_cat_image}`, `{route_X_cat_order'}`, where X is the specified URL segment.
 
 #### :category_url_title
 
-Matches a category url title. Does not match if the category url title is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidCategoryUrlTitle()`](#wildcard-isvalidcategoryurltitlewhere--array).
+Matches a category url title. Does not match if the category url title is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidCategoryUrlTitle()`](#wildcard-isvalidcategoryurltitlewhere--array). Adds the following variables: `{route_X_cat_id}`, `{route_X_site_id}`, `{route_X_group_id}`, `{route_X_parent_id}`, `{route_X_cat_name}`, `{route_X_cat_url_title}`, `{route_X_cat_description}`, `{route_X_cat_image}`, `{route_X_cat_order'}`, where X is the specified URL segment.
 
 #### :member_id
 
-Matches a member id. Does not match if the member id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidMemberId()`](#wildcard-isvalidmemberidwhere--array).
+Matches a member id. Does not match if the member id is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidMemberId()`](#wildcard-isvalidmemberidwhere--array). Adds the following variables: `{route_X_member_id}`, `{route_X_group_id}`, `{route_X_email}`, `{route_X_username}`, `{route_X_screen_name}`, where X is the specified URL segment.
 
 #### :username
 
-Matches a username. Does not match if the username is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidUsername()`](#wildcard-isvalidusernamewhere--array).
+Matches a username. Does not match if the username is not found in the database. To validate on additional columns (ex. `group_id` or `channel`), you should use a [Callback](#callbacks) and [`$wildcard->isValidUsername()`](#wildcard-isvalidusernamewhere--array). Adds the following variables: `{route_X_member_id}`, `{route_X_group_id}`, `{route_X_email}`, `{route_X_username}`, `{route_X_screen_name}`, where X is the specified URL segment.
 
 ### Matches
 
@@ -308,7 +310,7 @@ Get the value of the wildcard match.
 
 ##### $wildcard->isValidEntryId($where = array())
 
-Check if the specified entry_id exists.
+Check if the specified entry_id exists. Adds the following variables: `{route_X_entry_id}`, `{route_X_title}`, `{route_X_url_title}`, `{route_X_channel_id}`, where X is the specified URL segment.
 
     'blog/:num' => function($router, $wildcard) {
         if ($wildcard->isValidEntryId()) {
@@ -335,7 +337,7 @@ In the second parameter, you can specify other columns/values to use in the quer
 
 ##### $wildcard->isValidUrlTitle($where = array())
 
-Check if the specified url_title exists.
+Check if the specified url_title exists. Adds the following variables: `{route_X_entry_id}`, `{route_X_title}`, `{route_X_url_title}`, `{route_X_channel_id}`, where X is the specified URL segment.
 
     'blog/:any' => function($router, $wildcard) {
         if ($wildcard->isValidUrlTitle()) {
@@ -347,7 +349,7 @@ Check if the specified url_title exists.
 
 ##### $wildcard->isValidEntry($where = array())
 
-Check if the specified entry exists.
+Check if the specified entry exists. Adds the following variables: `{route_X_entry_id}`, `{route_X_title}`, `{route_X_url_title}`, `{route_X_channel_id}`, where X is the specified URL segment.
 
     'blog/:any' => function($router, $wildcard) {
         if ($wildcard->isValidEntry(array('url_title' => $wildcard, 'status' => 'open'))) {
@@ -359,7 +361,7 @@ Check if the specified entry exists.
 
 ##### $wildcard->isValidCategoryId($where = array())
 
-Check if the specified cat_id exists. If a match is found, this will automatically set global variables for the category data in the form {route_X_column_name}, eg. {route_1_cat_id} {route_2_cat_name}.
+Check if the specified cat_id exists. Adds the following variables: `{route_X_cat_id}`, `{route_X_site_id}`, `{route_X_group_id}`, `{route_X_parent_id}`, `{route_X_cat_name}`, `{route_X_cat_url_title}`, `{route_X_cat_description}`, `{route_X_cat_image}`, `{route_X_cat_order'}`, where X is the specified URL segment.
 
     'blog/:any' => function($router, $wildcard) {
         if ($wildcard->isValidCategoryId()) {
@@ -371,7 +373,7 @@ Check if the specified cat_id exists. If a match is found, this will automatical
 
 ##### $wildcard->isValidCategoryUrlTitle($where = array())
 
-Check if the specified category url_title exists. If a match is found, this will automatically set global variables for the category data in the form {route_X_column_name}, eg. {route_1_cat_id} {route_2_cat_name}.
+Check if the specified category url_title exists. Adds the following variables: `{route_X_cat_id}`, `{route_X_site_id}`, `{route_X_group_id}`, `{route_X_parent_id}`, `{route_X_cat_name}`, `{route_X_cat_url_title}`, `{route_X_cat_description}`, `{route_X_cat_image}`, `{route_X_cat_order'}`, where X is the specified URL segment.
 
     'blog/:any' => function($router, $wildcard) {
         if ($wildcard->isValidCategoryUrlTitle()) {
@@ -383,7 +385,7 @@ Check if the specified category url_title exists. If a match is found, this will
 
 ##### $wildcard->isValidCategory(array $where)
 
-Check if the specified category exists. If a match is found, this will automatically set global variables for the category data in the form {route_X_column_name}, eg. {route_1_cat_id} {route_2_cat_name}.
+Check if the specified category exists. Adds the following variables: `{route_X_cat_id}`, `{route_X_site_id}`, `{route_X_group_id}`, `{route_X_parent_id}`, `{route_X_cat_name}`, `{route_X_cat_url_title}`, `{route_X_cat_description}`, `{route_X_cat_image}`, `{route_X_cat_order'}`, where X is the specified URL segment.
 
     'blog/:any' => function($router, $wildcard) {
         // use the second parameter to specify a column to retrieve data from
@@ -401,7 +403,7 @@ Check if the specified category exists. If a match is found, this will automatic
 
 ##### $wildcard->isValidMemberId($where = array())
 
-Check if the specified member_id exists.
+Check if the specified member_id exists. Adds the following variables: `{route_X_member_id}`, `{route_X_group_id}`, `{route_X_email}`, `{route_X_username}`, `{route_X_screen_name}`, where X is the specified URL segment.
 
     'users/:num' => function($router, $wildcard) {
         if ($wildcard->isValidMemberId()) {
@@ -413,7 +415,7 @@ Check if the specified member_id exists.
 
 ##### $wildcard->isValidUsername($where = array())
 
-Check if the specified username exists.
+Check if the specified username exists. Adds the following variables: `{route_X_member_id}`, `{route_X_group_id}`, `{route_X_email}`, `{route_X_username}`, `{route_X_screen_name}`, where X is the specified URL segment.
 
     'users/:any' => function($router, $wildcard) {
         if ($wildcard->isValidUsername()) {
@@ -425,7 +427,7 @@ Check if the specified username exists.
 
 ##### $wildcard->isValidMember(array $where)
 
-Check if the specified member exists.
+Check if the specified member exists. Adds the following variables: `{route_X_member_id}`, `{route_X_group_id}`, `{route_X_email}`, `{route_X_username}`, `{route_X_screen_name}`, where X is the specified URL segment.
 
     'users/:any' => function($router, $wildcard) {
         // use the second parameter to specify a column to retrieve data from
@@ -436,6 +438,21 @@ Check if the specified member exists.
 
         if ($wildcard->isValidMember($where)) {
             $router->setTemplate('site/_user_detail');
+        } else {
+            $router->set404();
+        }
+    }
+
+#### $wildcard->getMeta(string $column)
+
+Get the specified meta data from the wildcard. This is only applicable to validating wildcards.
+
+    'posts/:url_title' => function($router, $wildcard) {
+        if ($wildcard->isValidUrlTitle()) {
+            // do something custom with this entry id
+            $entry_id = $wildcard->getMeta('entry_id');
+
+            $router->setTemplate('posts/_detail');
         } else {
             $router->set404();
         }

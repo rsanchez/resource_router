@@ -25,6 +25,12 @@ class Wildcard {
 	 */
 	public $type;
 
+	/**
+	 * Meta data from the database, e.g. entry_id, url_title, etc.
+	 * @var array|null
+	 */
+	protected $meta;
+
 	public function __construct(Router $router, $index, $value, $type)
 	{
 		$this->router = $router;
@@ -144,43 +150,34 @@ class Wildcard {
 			}
 		}
 
-		ee()->db->select('categories.*');
+		$select = array(
+			'cat_id',
+			'site_id',
+			'group_id',
+			'parent_id',
+			'cat_name',
+			'cat_url_title',
+			'cat_description',
+			'cat_image',
+			'cat_order',
+		);
+
+		foreach ($select as $column)
+		{
+			ee()->db->select('categories.'.$column);
+		}
 
 		$query = ee()->db->get('categories');
 
-		$return = $query->num_rows() > 0;
+		$isValid = $query->num_rows() > 0;
 
-		// route2cat
-		if ($return)
-		{
-			foreach ($query->row_array() as $key => $value)
-			{
-				$this->router->setGlobal(sprintf('route_%d_%s', $this->index, $key), $value);
-			}
-		}
-		else
-		{
-			$fields = array(
-				'cat_id',
-				'site_id',
-				'group_id',
-				'parent_id',
-				'cat_name',
-				'cat_url_title',
-				'cat_description',
-				'cat_image',
-				'cat_order',
-			);
+		$meta = $isValid ? $query->row_array() : array_fill_keys($select, null);
 
-			foreach ($fields as $key)
-			{
-				$this->router->setGlobal(sprintf('route_%d_%s', $this->index, $key), '');
-			}
-		}
+		$this->setMeta($meta);
 
 		$query->free_result();
 
-		return $return;
+		return $isValid;
 	}
 
 	/**
@@ -244,7 +241,29 @@ class Wildcard {
 			}
 		}
 
-		return ee()->db->count_all_results('channel_titles') > 0;
+		$select = array(
+			'entry_id',
+			'title',
+			'url_title',
+			'channel_id',
+		);
+
+		foreach ($select as $column)
+		{
+			ee()->db->select('channel_titles.'.$column);
+		}
+
+		$query = ee()->db->get('channel_titles');
+
+		$isValid = $query->num_rows() > 0;
+
+		$meta = $isValid ? $query->row_array() : array_fill_keys($select, null);
+
+		$this->setMeta($meta);
+
+		$query->free_result();
+
+		return $isValid;
 	}
 
 	/**
@@ -275,7 +294,27 @@ class Wildcard {
 			}
 		}
 
-		return ee()->db->count_all_results('members') > 0;
+		$select = array(
+			'member_id',
+			'group_id',
+			'email',
+			'username',
+			'screen_name',
+		);
+
+		ee()->db->select($select);
+
+		$query = ee()->db->get('members');
+
+		$isValid = $query->num_rows() > 0;
+
+		$meta = $isValid ? $query->row_array() : array_fill_keys($select, null);
+
+		$this->setMeta($meta);
+
+		$query->free_result();
+
+		return $isValid;
 	}
  
 	/**
@@ -384,6 +423,31 @@ class Wildcard {
 		$where['username'] = $this->value;
 
 		return $this->isValidMember($where);
+	}
+
+	/**
+	 * Get data from this wildcard's DB table (if applicable)
+	 * @param  string $column ex. entry_id
+	 * @return string|null
+	 */
+	public function getMeta($column)
+	{
+		return isset($this->meta[$column]) ? $this->meta[$column] : null;
+	}
+
+	/**
+	 * Set the meta for this validating wildcard (if applicable)
+	 * @param array $meta
+	 * @return void
+	 */
+	protected function setMeta(array $meta)
+	{
+		$this->meta = $meta;
+
+		foreach ($this->meta as $key => $value)
+		{
+			$this->router->setGlobal(sprintf('route_%d_%s', $this->index, $key), $value);
+		}
 	}
 
 	public function __toString()
