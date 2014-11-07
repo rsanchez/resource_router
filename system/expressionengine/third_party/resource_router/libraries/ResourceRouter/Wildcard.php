@@ -450,6 +450,72 @@ class Wildcard {
 		}
 	}
 
+	public function compare($operator, $value)
+	{
+		switch ($operator) {
+			case '==':
+				return $this->value == $value;
+			case '===':
+				return $this->value === $value;
+			case '!=':
+				return $this->value != $value;
+			case '<>':
+				return $this->value <> $value;
+			case '!==':
+				return $this->value !== $value;
+			case '>':
+				return $this->value > $value;
+			case '>=':
+				return $this->value >= $value;
+			case '<':
+				return $this->value < $value;
+			case '<=':
+				return $this->value <= $value;
+		}
+
+		throw new \Exception('Invalid comparison operator.');
+	}
+
+	public function is($value)
+	{
+		return $this->compare('==', $value);
+	}
+
+	public function isExactly($value)
+	{
+		return $this->compare('===', $value);
+	}
+
+	public function isNot($value)
+	{
+		return $this->compare('!=', $value);
+	}
+
+	public function isNotExactly($value)
+	{
+		return $this->compare('!==', $value);
+	}
+
+	public function isGreaterThan($value)
+	{
+		return $this->compare('>', $value);
+	}
+
+	public function isGreaterThanOrEqual($value)
+	{
+		return $this->compare('>=', $value);
+	}
+
+	public function isLessThan($value)
+	{
+		return $this->compare('<', $value);
+	}
+
+	public function isLessThanOrEqual($value)
+	{
+		return $this->compare('<=', $value);
+	}
+
 	public function __toString()
 	{
 		return (string) $this->value;

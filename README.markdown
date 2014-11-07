@@ -23,9 +23,9 @@ Replace this:
 With this:
 
     'blog/:any' => function ($router, $wildcard) {
-        if ($wildcard->value == 'category') {
+        if ($wildcard->is('category')) {
             $router->setTemplate('blog/.category');
-        } elseif ($wildcard->value === 'view') {
+        } elseif ($wildcard->is('view')) {
             $router->setTemplate('blog/.single');
         } else {
             $router->setTemplate('blog/.listing');
@@ -172,7 +172,7 @@ If you wish to output an EE template at the specified url pattern, your callback
 Or you can avoid setting a template to signify that this url does *not* match the route:
 
     'blog/:any' => function($router, $wildcard) {
-        if ($wildcard->value === 'foo') {
+        if ($wildcard->is('foo')) {
             return;
         }
         $router->setTemplate('blog/single');
@@ -306,7 +306,52 @@ Get the value of the wildcard match.
 
     'blog/:any/:any' => function($router, $wildcard_1, $wildcard_2) {
         $last_segment = $wildcard_2->value;
+
+        // you may also simply cast to string
+        $last_segment = (string) $wildcard_2;
     }
+
+##### $wildcard->is($value)
+
+Check if the wildcard equals the specified value. This uses the PHP `==` operator internally.
+
+```
+    'blog/:url_title' => function($router, $wildcard) {
+        if ($wildcard->is('some_special_post')) {
+            $router->setTemplate('site/_blog_special');
+        } else {
+            $router->setTemplate('site/_blog_detail');
+        }
+    }
+```
+
+##### $wildcard->isNot($value)
+
+Check if the wildcard is not equal to the specified value. This uses the PHP `!=` operator.
+
+##### $wildcard->isExactly($value)
+
+Check if the wildcard is exactly equal to the specified value. This uses the PHP `===` operator.
+
+##### $wildcard->isNotExactly($value)
+
+Check if the wildcard is not exactly equal to the specified value. This uses the PHP `!==` operator.
+
+##### $wildcard->isGreaterThan($value)
+
+Check if the wildcard is greater than the specified value. This uses the PHP `>` operator.
+
+##### $wildcard->isGreaterThanOrEquals($value)
+
+Check if the wildcard is greater than or equal to the specified value. This uses the PHP `>=` operator.
+
+##### $wildcard->isLessThan($value)
+
+Check if the wildcard is less than the specified value. This uses the PHP `<` operator.
+
+##### $wildcard->isLessThanOrEquals($value)
+
+Check if the wildcard is less than or equal to the specified value. This uses the PHP `<=` operator.
 
 ##### $wildcard->isValidEntryId($where = array())
 
@@ -390,7 +435,7 @@ Check if the specified category exists. Adds the following variables: `{route_X_
     'blog/:any' => function($router, $wildcard) {
         // use the second parameter to specify a column to retrieve data from
         $valid = $wildcard->isValidCategory(array(
-            'cat_url_title' => $wildcard->value,
+            'cat_url_title' => $wildcard,
             'channel' => 'blog',
         ));
 
