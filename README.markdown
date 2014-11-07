@@ -100,7 +100,7 @@ Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_
 
 #### :all
 
-Matches all possible segments. The equivalent regular expression is `((?:/.*)?)`. This is an *optional* segment. If not present in the URI, the URI will still be considered a match. If so, the Wildcard object will have a `null` value.
+Matches all possible segments. The equivalent regular expression is `((?:/.*)?)`. This is an *optional* segment. If not present in the URI, the URI will still be considered a match. If so, the Wildcard object will have a `null` value. When multiple segments are detected, the callback will receive many Wildcard objects.
 
 ### Validating Wildcards
 

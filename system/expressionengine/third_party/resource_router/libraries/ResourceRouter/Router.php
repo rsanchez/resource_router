@@ -192,7 +192,23 @@ class Router {
 						$segment = NULL;
 					}
 
-					$this->wildcards[$index] = new Wildcard($this, $index, $segment, $type);
+					if ($type === 'all')
+					{
+						$segs = explode('/', rtrim($segment, '/'));
+
+						$index--;
+
+						foreach ($segs as $j => $seg)
+						{
+							$index++;
+
+							$this->wildcards[$index] = new Wildcard($this, $index, $seg, 'any');
+						}
+					}
+					else
+					{
+						$this->wildcards[$index] = new Wildcard($this, $index, $segment, $type);
+					}
 					
 					//if it wasn't a callback (where it's assumed you ran your own validation),
 					//validate all the wildcards and bail if it fails
