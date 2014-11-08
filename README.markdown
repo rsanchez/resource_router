@@ -60,6 +60,8 @@ Your routing rules must be set in your system/expressionengine/config/config.php
 
 On the left is the URI pattern you wish to match, and on the right is one of two things: a) a string representing a `template_group/template_name` pair, or b) a callback receiving Router and Wilcard objects where you can craft a response for the URL. The callback functionality is covered in the [Advanced Usage](#advanced-usage) section.
 
+NOTE: Pages module or Structure module URLs take precendence over Resource Router.
+
 ### Wildcards
 
 #### :any
