@@ -494,6 +494,10 @@ class Router {
 	 */
 	public function setGlobal($key, $value = '')
 	{
+		if ($value instanceof Wildcard) {
+			$value = (string) $value;
+		}
+
 		ee()->config->_global_vars[$key] = $value;
 
 		return $this;

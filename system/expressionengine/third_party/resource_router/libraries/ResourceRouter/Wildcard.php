@@ -516,6 +516,11 @@ class Wildcard {
 		return $this->compare('<=', $value);
 	}
 
+	public function isEmpty()
+	{
+		return ! $this->value && $this->value !== '0';
+	}
+
 	public function __toString()
 	{
 		return (string) $this->value;
