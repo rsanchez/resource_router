@@ -342,8 +342,6 @@ class Router {
 	 */
 	public function json($data, $options = 0)
 	{
-		$this->setOutputType('json');
-
 		if (is_object($data) && ! $data instanceof \JsonSerializable)
 		{
 			if (method_exists($data, 'toJson'))
@@ -364,7 +362,9 @@ class Router {
 			$output = json_encode($data, $options);
 		}
 
-		return $this->output($output);
+		return $this->quit(200, $output, array(
+			'Content-Type' => 'application/json',
+		));
 	}
 
 	/**
@@ -674,5 +674,26 @@ class Router {
 	public function variable($which)
 	{
 		return ee()->session->cache('resource_router', $which);
+	}
+
+	/**
+	 * Exit the application immediately
+	 * @param  int    $statusCode
+	 * @param  string $message
+	 * @param  array  $headers
+	 * @return void
+	 */
+	protected function quit($statusCode, $message = '', $headers = array())
+	{
+		set_status_header($statusCode);
+
+		$hasContentLength = false;
+
+		foreach ($headers as $key => $value)
+		{
+			header(sprintf('%s: %s', $key, $value));
+		}
+
+		exit($message);
 	}
 }
