@@ -299,6 +299,12 @@ class Router {
 		return $this->isPage;
 	}
 
+	/**
+	 * Redirect to the specified url or path
+	 * @param  string $url
+	 * @param  int    $statusCode
+	 * @return void
+	 */
 	public function redirect($url, $statusCode = 301)
 	{
 		// if it doesn't start with:
@@ -312,11 +318,7 @@ class Router {
 			$url = ee()->functions->create_url($url);
 		}
 
-		$this->setHeader('Location: '.$url);
-
-		$this->setHttpStatus($statusCode);
-
-		$this->output();
+		ee()->functions->redirect($url, false, $statusCode);
 	}
 
 	/**
