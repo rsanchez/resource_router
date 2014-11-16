@@ -111,7 +111,7 @@ class Router {
 				// check for a :page:XX wildcard
 				if (preg_match('/\(?:page:(\d+)\)?/', $rule, $match) && isset($this->pageUris[$match[1]]))
 				{
-					$rule = str_replace($match[0], '('.ltrim($this->pageUris[$match[1]], '/').')', $rule);
+					$rule = str_replace($match[0], '('.trim($this->pageUris[$match[1]], '/').')', $rule);
 
 					// don't count a page uri as wildcard
 					$wildcard = strpos($rule, ':');
