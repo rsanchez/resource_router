@@ -481,6 +481,16 @@ class Wildcard {
 		return $this->compare('==', $value);
 	}
 
+    public function in($where = array())
+    {
+        foreach($where as $value)
+        {
+            if($this->compare('==', $value)){
+                return true;
+            }
+        }    
+    }
+    
 	public function isExactly($value)
 	{
 		return $this->compare('===', $value);
