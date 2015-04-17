@@ -327,6 +327,24 @@ Check if the wildcard equals the specified value. This uses the PHP `==` operato
     }
 ```
 
+##### $wildcard->in(array $where)
+
+Check if the wildcard exists in a given array. This uses the PHP in_array method. 
+
+
+```
+    ':any' => function($router, $wildcard) {
+        $sections = array(
+                            'member',
+                            'profile'                                            
+                        );
+        if ($wildcard->in($sections)) 
+        {
+             $router->setTemplate('customer/index');
+        }
+    }
+```
+
 ##### $wildcard->isNot($value)
 
 Check if the wildcard is not equal to the specified value. This uses the PHP `!=` operator.
