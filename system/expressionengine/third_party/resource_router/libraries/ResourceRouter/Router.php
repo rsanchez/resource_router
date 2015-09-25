@@ -96,6 +96,16 @@ class Router {
 
 		$found_match = FALSE;
 
+		if (isset($this->routes[':before']))
+		{
+			if (is_callable($this->routes[':before']))
+			{
+				call_user_func($this->routes[':before'], $this);
+			}
+
+			unset($this->routes[':before']);
+		}
+
 		// loop through all the defined routes and check if the uri_string is a match
 		foreach($this->routes as $rule => $template)
 		{
