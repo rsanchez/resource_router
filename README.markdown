@@ -104,6 +104,12 @@ Matches a Pages/Structure URI for the specified entry_id, where XX is the entry_
 
 Matches all possible segments. The equivalent regular expression is `((?:/.*)?)`. This is an *optional* segment. If not present in the URI, the URI will still be considered a match. If so, the Wildcard object will have a `null` value. When multiple segments are detected, the callback will receive many Wildcard objects.
 
+#### :before
+
+Register a callback to be run **before** ALL routes. For instance, this is a good place to set global variables that you need on all pages.
+
+NOTE: This is a special wildcard. Your route must be exactly `':before'` with no other segments.
+
 ### Validating Wildcards
 
 These wildcards will perform a database operation to ensure that the wildcard value exists in the database. To validate on additional columns (ex. `status` or `channel`) you should use [Callbacks](#callbacks)). If you provide a callback, as opposed to a `template_group/template_name` string, the wildcard will *not* be validated. You must validate it yourself in your callback.
@@ -571,3 +577,16 @@ A custom JSON endpoint:
             $router->json($result);
         }
     );
+
+
+A callback used before all routes:
+```
+$config['resource_router'] = array(
+    ':before' => function($router) {
+        $admin_groups = array(1, 6, 7);
+        $group_id = ee()->session->userdata('group_id');
+        $is_admin = in_array($group_id, $admin_groups);
+        $router->setGlobal('is_admin', $is_admin);
+    },
+);
+```
