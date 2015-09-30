@@ -24,7 +24,7 @@
 
 $plugin_info = array(
 	'pi_name'   => 'resource_router',
-	'pi_version'  => '1.0.8',
+	'pi_version'  => '1.0.9',
 	'pi_author'   => 'Rob Sanchez',
 	'pi_author_url' => 'https://github.com/rsanchez',
 	'pi_description'=> 'Tags for Resource Router variables',

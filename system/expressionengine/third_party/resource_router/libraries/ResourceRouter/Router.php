@@ -46,6 +46,12 @@ class Router {
 	protected $wildcards = array();
 
 	/**
+	 * Content-Type header
+	 * @var string
+	 */
+	protected $contentType;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param  string $uri_string
@@ -409,9 +415,9 @@ class Router {
 	{
 		ee()->output->final_output = $output;
 
-		$output_type = ee()->output->out_type;
+		$output_type = $this->contentType ? 'custom' : ee()->output->out_type;
 
-		$override_types = array('webpage', 'css', 'js', 'xml', 'json');
+		$override_types = array('webpage', 'css', 'js', 'xml', 'json', 'custom');
 
 		// dont send those weird pragma no-cache headers
 		if (in_array($output_type, $override_types))
@@ -530,10 +536,20 @@ class Router {
 		if (func_num_args() === 1)
 		{
 			ee()->output->set_header($header);
+
+			if (strncmp($header, 'Content-Type: ', 14) === 0)
+			{
+				$this->contentType = substr($header, 14);
+			}
 		}
 		else
 		{
-			ee()->output->set_header(sprintf('%s: %s', $header, func_get_arg(1)));
+			ee()->output->set_header(sprintf('%s: %s', $header, $content));
+
+			if ($header === 'Content-Type')
+			{
+				$this->contentType = $content;
+			}
 		}
 
 		return $this;
