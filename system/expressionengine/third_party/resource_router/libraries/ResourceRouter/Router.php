@@ -86,13 +86,13 @@ class Router {
 		}
 
 		// normalize the uri_string
-		$uri_string = rtrim($uri_string, '/');
+		$this->uriString = rtrim($uri_string, '/');
 
 		// start with an empty query_string
 		$query_string = '';
 
 		// check if this URI is a Pages URI
-		$this->isPage = in_array('/'.$uri_string, $this->pageUris);
+		$this->isPage = in_array('/'.$this->uriString, $this->pageUris);
 
 		$found_match = FALSE;
 
@@ -185,7 +185,7 @@ class Router {
 			$regex = '#^'.trim($regex, '/').'$#';
 
 			// check if the uri_string matches this route
-			if (preg_match($regex, $uri_string, $match))
+			if (preg_match($regex, $this->uriString, $match))
 			{
 				array_shift($match);
 
@@ -219,7 +219,7 @@ class Router {
 					{
 						$this->wildcards[$index] = new Wildcard($this, $index, $segment, $type);
 					}
-					
+
 					//if it wasn't a callback (where it's assumed you ran your own validation),
 					//validate all the wildcards and bail if it fails
 					if ( ! is_callable($template) && ! $this->wildcards[$index]->isValid())
@@ -258,7 +258,7 @@ class Router {
 						// normally gets set in Template::parse_template_uri(), but we are overriding that function here
 						// let's grab the bits of the uri that are dynamic and set that as the query_string
 						// e.g. blog/nested/here/:any => _blog/_view will yield a query_string of that final segment
-						$query_string = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $uri_string);
+						$query_string = preg_replace('#^'.preg_quote(str_replace(array('(', ')'), '', substr($rule, 0, $wildcard))).'#', '', $this->uriString);
 					}
 
 					break;
