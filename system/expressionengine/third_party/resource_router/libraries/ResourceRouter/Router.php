@@ -10,7 +10,7 @@ class Router {
 	 * List of routes
 	 *
 	 * 'this/is/a/uri/:any' => 'template_group/template_name',
-	 * 
+	 *
 	 * @var array
 	 */
 	protected $routes = array();
@@ -20,6 +20,12 @@ class Router {
 	 * @var array
 	 */
 	protected $pageUris = array();
+
+	/**
+	 * The request URI
+	 * @var string
+	 */
+	protected $uriString;
 
 	/**
 	 * Is the matched URI a page URI?
@@ -306,8 +312,29 @@ class Router {
 	}
 
 	/**
+	 * Set uriString property
+	 *
+	 * @param string $uriString the new URI
+	 * @return void
+	 */
+	public function setUri($uriString)
+	{
+		$this->uriString = rtrim($uriString, '/');
+	}
+
+	/**
+	 * Get uriString property
+	 *
+	 * @return string
+	 */
+	public function getUri()
+	{
+		return $this->uriString;
+	}
+
+	/**
 	 * Does this route match a page URI?
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function isPage()
