@@ -34,7 +34,7 @@ With this:
 
 ## Installation
 
-*NOTE:* ExpressionEngine 2.6+ and PHP 5.3+ are required
+*NOTE:* ExpressionEngine 2.6+ or ExpressionEngine 3.0+ and PHP 5.3+ are required
 
 * Copy the /system/expressionengine/third_party/resource_router/ folder to your /system/expressionengine/third_party/ folder
 * Install the extension
