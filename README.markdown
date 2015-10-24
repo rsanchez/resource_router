@@ -304,6 +304,14 @@ Redirect to the specified URL or `template_group/template_name`.
         $router->redirect('foo/bar');
     }
 
+##### $router->setUri($uriString)
+
+Override the current uri being used by the system.
+
+    'blog/:any' => function($router, $wildcard) {
+        $router->setUri('blog/view/'.$wildcard);
+    }
+
 #### $wildcard
 
 The second and subsequent callback arguments are `rsanchez\ResourceRouter\Wildcard` objects.
