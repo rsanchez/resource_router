@@ -476,7 +476,7 @@ class Router {
 
 		if (version_compare(APP_VER, '3', '<'))
 		{
-			return $this->legacy_display();
+			return $this->legacyDisplay();
 		}
 
 		ee()->output->_display();
@@ -484,7 +484,11 @@ class Router {
 		exit;
 	}
 
-	protected function legacy_display()
+	/**
+	 * Display output in EE2
+	 * @return void
+	 */
+	protected function legacyDisplay()
 	{
 		// Start from CodeIgniter.php
 		ee()->benchmark->mark('controller_execution_time_( EE / index )_end');
