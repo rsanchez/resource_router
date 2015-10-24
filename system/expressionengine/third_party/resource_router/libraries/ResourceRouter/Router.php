@@ -518,6 +518,24 @@ class Router {
 	 */
 	public function set404()
 	{
+		if (version_compare(APP_VER, '3', '<'))
+		{
+			return $this->legacy404();
+		}
+
+        ee()->load->library('template', NULL, 'TMPL');
+
+        ee()->TMPL->show_404();
+
+        return $this;
+	}
+
+	/**
+	 * Trigger a 404 in EE2
+	 * @return this
+	 */
+	public function legacy404()
+	{
 		//all the conditions to trigger a 404 in the TMPL class
 		$hidden_template_indicator = ee()->config->item('hidden_template_indicator') ?: '.';
 		
@@ -527,6 +545,8 @@ class Router {
 
 		$this->templateGroup = $hidden_template_indicator;
 		$this->templateName = $hidden_template_indicator;
+
+		return $this;
 	}
 
 	/**
