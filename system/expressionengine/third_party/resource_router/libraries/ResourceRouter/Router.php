@@ -447,6 +447,18 @@ class Router {
 			ee()->output->out_type = 'cp_asset';
 		}
 
+		if (version_compare(APP_VER, '3', '<'))
+		{
+			return $this->legacy_display();
+		}
+
+		ee()->output->_display();
+
+		exit;
+	}
+
+	protected function legacy_display()
+	{
 		// Start from CodeIgniter.php
 		ee()->benchmark->mark('controller_execution_time_( EE / index )_end');
 
