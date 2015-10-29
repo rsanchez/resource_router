@@ -727,11 +727,15 @@ class Router {
 
 	/**
 	 * Get the set template
-	 * 
+	 *
 	 * @return mixed
 	 */
 	public function template()
 	{
+		// Set hidden template to empty string to make sure template can be
+		// served
+		ee()->config->set_item('hidden_template_indicator', '');
+
 		return array($this->templateGroup, $this->templateName);
 	}
 
