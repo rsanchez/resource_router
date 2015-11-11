@@ -669,12 +669,14 @@ class Router {
 		$this->templateGroup = $template[0];
 		$this->templateName = isset($template[1]) ? $template[1] : 'index';
 
-		$hidden_template_indicator = ee()->config->item('hidden_template_indicator') ?: '.';
+		$default_hidden_template_indicator = version_compare(APP_VER, '2.9.0', '<') ? '.' : '_';
+
+		$hidden_template_indicator = ee()->config->item('hidden_template_indicator') ?: $default_hidden_template_indicator;
 
 		//allow you to set hidden templates
 		if (isset($this->templateName[0]) && $this->templateName[0] === $hidden_template_indicator)
 		{
-			ee()->config->set_item('hidden_template_indicator', '%');
+			ee()->config->set_item('hidden_template_indicator', '');
 		}
 
 		return $this;
