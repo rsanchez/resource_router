@@ -312,6 +312,14 @@ Override the current uri being used by the system.
         $router->setUri('blog/view/'.$wildcard);
     }
 
+##### $router->stopRouting()
+
+Stop any following routes that also match the url from being processed.
+
+    'blog/:any' => function($router) {
+        $router->stopRouting();
+    }
+
 #### $wildcard
 
 The second and subsequent callback arguments are `rsanchez\ResourceRouter\Wildcard` objects.
