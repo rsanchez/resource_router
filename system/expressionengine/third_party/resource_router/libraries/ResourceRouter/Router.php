@@ -34,6 +34,12 @@ class Router {
 	protected $isPage = FALSE;
 
 	/**
+	 * Should we continue to process routes?
+	 * @var boolean
+	 */
+	protected $processRoutes = TRUE;
+
+	/**
 	 * The template group
 	 * @var null|string
 	 */
@@ -121,6 +127,12 @@ class Router {
 		// loop through all the defined routes and check if the uri_string is a match
 		foreach($this->routes as $rule => $template)
 		{
+			// should we continue to process routes?
+			if ($this->processRoutes === FALSE) 
+			{
+				break;
+			}
+
 			// normalize the rule
 			$rule = rtrim($rule, '/');
 
@@ -482,6 +494,15 @@ class Router {
 		ee()->output->_display();
 
 		exit;
+	}
+
+	/**
+	 * Stop processing routes
+	 * @return void
+	 */
+	public function stopRouting()
+	{
+		$this->processRoutes = FALSE;
 	}
 
 	/**
