@@ -247,6 +247,10 @@ class Wildcard {
 			'url_title',
 			'channel_id',
 		);
+		
+		// limit search to current site
+		$site_id= ee()->config->item('site_id');
+		ee()->db->where('channel_titles.site_id',$site_id);
 
 		foreach ($select as $column)
 		{
