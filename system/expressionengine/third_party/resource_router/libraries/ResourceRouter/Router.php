@@ -535,7 +535,7 @@ class Router {
 	/**
 	 * Trigger a 404 using the built-in EE 404 template
 	 *
-	 * @return this
+	 * @return $this
 	 */
 	public function set404()
 	{
@@ -553,7 +553,7 @@ class Router {
 
 	/**
 	 * Trigger a 404 in EE2
-	 * @return this
+	 * @return $this
 	 */
 	public function legacy404()
 	{
@@ -576,7 +576,7 @@ class Router {
 	 * $router->setContentType('application/json');
 	 * 
 	 * @param string $content_type
-	 * @return this
+	 * @return $this
 	 */
 	public function setContentType($content_type)
 	{
@@ -592,7 +592,7 @@ class Router {
 	 * 
 	 * @param string $key   the variable name
 	 * @param string|bool|int $value
-	 * @return this
+	 * @return $this
 	 */
 	public function setGlobal($key, $value = '')
 	{
@@ -613,7 +613,7 @@ class Router {
 	 * 
 	 * @param string $header the full header string if using one parameter, the header name if using two parameters
 	 * @param string $content [optional] the header content if using two parameters
-	 * @return this
+	 * @return $this
 	 */
 	public function setHeader($header, $content = NULL)
 	{
@@ -645,7 +645,7 @@ class Router {
 	 * $router->setHttpStatus(401);
 	 * 
 	 * @param int $code a valid HTTP status code
-	 * @return this
+	 * @return $this
 	 */
 	public function setHttpStatus($code)
 	{
@@ -663,7 +663,7 @@ class Router {
 	 * $router->setOutputType('css');
 	 * 
 	 * @param string $type one of the following: webpage, css, js, json, xml, feed, 404
-	 * @return this
+	 * @return $this
 	 */
 	public function setOutputType($type)
 	{
@@ -678,7 +678,7 @@ class Router {
 	 * $router->setTemplate('foo/bar');
 	 * 
 	 * @param string $template a template_group/template_name pair
-	 * @return this
+	 * @return $this
 	 */
 	public function setTemplate($template)
 	{
@@ -720,7 +720,7 @@ class Router {
 	 * 
 	 * @param string $name the key or identifier of the variable
 	 * @param string|array $data an array for a tag pair or a single value
-	 * @return this
+	 * @return $this
 	 */
 	public function setVariable($name, $data)
 	{
@@ -736,7 +736,7 @@ class Router {
 	 *
 	 * @param  int $which from 1 -> 10
 	 * @param  string $value the wildcard variable value
-	 * @return this
+	 * @return $this
 	 */
 	public function setWildcard($which, $value)
 	{
