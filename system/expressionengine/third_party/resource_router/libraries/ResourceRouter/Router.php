@@ -354,7 +354,7 @@ class Router {
 
 	/**
 	 * @param int $num
-	 
+	 *
 	 * @return string
 	 */
 	public function getSegment($num = 1)
