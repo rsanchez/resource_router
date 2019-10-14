@@ -16,6 +16,11 @@ class Wildcard {
 	protected $index;
 
 	/**
+	 * The XSS-cleaned value found in the URL for this matching wildcard.
+	 */
+	protected $clean_value;
+
+	/**
 	 * The value found in the URL for this matching wildcard.
 	 */
 	public $value;
@@ -37,6 +42,24 @@ class Wildcard {
 		$this->index = $index;
 		$this->value = $value;
 		$this->type = $type;
+	}
+
+	/**
+	 * Return the XSS-cleaned value if it exists, otherwise create
+	 * and return it.
+	 * @param  string $name Property name
+	 * @return string       XSS-cleaned property value
+	 */
+	public function __get($name)
+	{
+		if ($name == 'clean_value') {
+			if (isset($this->clean_value)) {
+				return $this->clean_value;
+			} else {
+				$this->clean_value = ee()->security->xss_clean($this->value);
+				return $this->clean_value;
+			}
+		}
 	}
 
 	/**
