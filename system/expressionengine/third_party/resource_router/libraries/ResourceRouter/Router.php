@@ -2,8 +2,6 @@
 
 namespace rsanchez\ResourceRouter;
 
-use rsanchez\ResourceRouter\Wildcard;
-
 class Router {
 
 	/**
