@@ -149,6 +149,8 @@ class Wildcard {
 				ee()->db->where($key, (string) $value);
 			}
 		}
+		
+		ee()->db->where('categories.site_id', ee()->config->item('site_id'));
 
 		$select = array(
 			'cat_id',
@@ -240,6 +242,8 @@ class Wildcard {
 				ee()->db->where($key, (string) $value);
 			}
 		}
+		
+		ee()->db->where('channel_titles.site_id', ee()->config->item('site_id'));
 
 		$select = array(
 			'entry_id',
