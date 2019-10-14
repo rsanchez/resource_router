@@ -341,6 +341,33 @@ class Router {
 	{
 		return $this->uriString;
 	}
+	
+	/**
+	 * @return array
+	 */
+	public function getSegments()
+	{
+		return explode('/', trim($this->uriString, '/'));
+	}
+
+	/**
+	 * @param int $num
+	 *
+	 * @return string
+	 */
+	public function getSegment($num = 1)
+	{
+		$segments = $this->getSegments();
+		
+		// The array is 0 indexed, so decrement
+		$num--;
+
+		if (isset($segments[$num]) ? $segments[$num] : '') {
+			return $segments[$num];
+		}
+
+		return '';
+	}
 
 	/**
 	 * Does this route match a page URI?
