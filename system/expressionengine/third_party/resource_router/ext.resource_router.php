@@ -117,7 +117,7 @@ class Resource_router_ext {
 		require_once PATH_THIRD.'resource_router/libraries/ResourceRouter/Router.php';
 		require_once PATH_THIRD.'resource_router/libraries/ResourceRouter/Wildcard.php';
 
-		$router = new \rsanchez\ResourceRouter\Router($uri_string);
+		$router = new \rsanchez\ResourceRouter\Router($uri);
 
 		if ($router->isRoutable())
 		{
