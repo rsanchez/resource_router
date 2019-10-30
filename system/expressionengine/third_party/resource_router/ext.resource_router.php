@@ -57,6 +57,18 @@ class Resource_router_ext {
 		);
 
 		ee()->db->insert('extensions', $data);
+		
+		$data = array(
+			'class'		=> __CLASS__,
+			'method'	=> 'publish_live_preview_route',
+			'hook'		=> 'publish_live_preview_route',
+			'settings'	=> serialize($this->settings),
+			'version'	=> $this->version,
+			'enabled'	=> 'y',
+			'priority'  => 1,
+		);
+
+		ee()->db->insert('extensions', $data);
 
 	}
 
@@ -83,6 +95,50 @@ class Resource_router_ext {
 
 			// set the route as array from the template string
 			return $router->template();
+		}
+
+		// set the default route to any other extension calling this hook
+		return ee()->extensions->last_call;
+	}
+
+	// ----------------------------------------------------------------------
+
+	/**
+	 * publish_live_preview_route
+	 *
+	 * @param array  $post_data
+	 * @param string $uri
+	 * @param int    $template_id
+	 * @return array
+	 */
+	public function publish_live_preview_route(array $post_data, $uri, $template_id)
+	{
+		//since EE2 doesn't have an autoloader
+		require_once PATH_THIRD.'resource_router/libraries/ResourceRouter/Router.php';
+		require_once PATH_THIRD.'resource_router/libraries/ResourceRouter/Wildcard.php';
+
+		$router = new \rsanchez\ResourceRouter\Router($uri_string);
+
+		if ($router->isRoutable())
+		{
+			// prevent other extensions from messing with us
+			// ee()->extensions->end_script = TRUE;
+
+			// get the route as array from the template string
+			$route = $router->template();
+			
+			$template = ee('Model')->get('Template')
+				->with('TemplateGroup')
+				->filter('TemplateGroup.group_name', $route[0])
+				->filter('template_name', $route[1])
+				->first();
+			
+			if ($template) {
+				return array(
+					'uri'		=> $uri,
+					'template_id'	=> $template->template_id,
+				);
+			}
 		}
 
 		// set the default route to any other extension calling this hook
