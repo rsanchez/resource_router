@@ -170,6 +170,20 @@ class Resource_router_ext {
 		{
 			return FALSE;
 		}
+
+		if (version_compare($current, '1.2.0', '<')) {
+			$data = array(
+				'class'		=> __CLASS__,
+				'method'	=> 'publish_live_preview_route',
+				'hook'		=> 'publish_live_preview_route',
+				'settings'	=> serialize($this->settings),
+				'version'	=> $this->version,
+				'enabled'	=> 'y',
+				'priority'  => 1,
+			);
+
+			ee()->db->insert('extensions', $data);
+		}
 	}
 
 	// ----------------------------------------------------------------------
