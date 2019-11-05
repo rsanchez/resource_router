@@ -90,9 +90,6 @@ class Resource_router_ext {
 
 		if ($router->isRoutable())
 		{
-			// prevent other extensions from messing with us
-			// ee()->extensions->end_script = TRUE;
-
 			// set the route as array from the template string
 			return $router->template();
 		}
@@ -121,9 +118,6 @@ class Resource_router_ext {
 
 		if ($router->isRoutable())
 		{
-			// prevent other extensions from messing with us
-			// ee()->extensions->end_script = TRUE;
-
 			// get the route as array from the template string
 			$route = $router->template();
 			
